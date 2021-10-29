@@ -36,8 +36,4 @@ RUN pip3 install git+https://github.com/cirosec-studis/python-zimbra
 ADD ./files/send_mail.py /srv/zimbraweb/send_mail.py
 RUN chmod 777 /srv/zimbraweb/send_mail.py
 
-# just for debugging
-RUN touch /srv/zimbraweb/pipe.log
-RUN chmod 777 /srv/zimbraweb/pipe.log
-
 CMD ["postfix", "start-fg"]
