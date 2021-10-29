@@ -1,7 +1,8 @@
 #!/usr/bin/python3
 
 import sys
+import zimbraweb
 
-f = open("/srv/zimbraweb/pipe.log", "a")
-f.write(str(sys.stdin.read()))
-f.close()
+user = ZimbraUser("https://studgate.dhbw-mannheim.de")
+#user.set_authtoken(sys.argv[0]) #get token from SASL, not yet implemented
+user.send_raw_payload(user.generate_eml_payload(sys.stdin.read()))
