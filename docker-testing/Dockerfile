@@ -1,6 +1,8 @@
-FROM python
+FROM python:alpine
 
-COPY ./test.py /test/test.py
-RUN chmod 777 /test/test.py
+WORKDIR /test
 
-CMD /test/test.py
+COPY ./test.py test.py
+RUN chmod 777 test.py
+
+CMD sh
