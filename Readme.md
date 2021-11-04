@@ -17,5 +17,5 @@ Create a folder with the files `user` and `password` that contain exactly those.
 To start the container use the following command
 
 ```
-docker run -p 25:25 -v /path/to/secrets:/secrets jmlemmi/zimbrawebbridge:a.1
+docker run -p 25:25 -v /path/to/secrets:/secrets jmlemmi/zimbraweb-smtp-bridge:a.1
 ```
