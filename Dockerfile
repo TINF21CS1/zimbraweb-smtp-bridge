@@ -40,4 +40,7 @@ RUN chmod 777 /srv/zimbraweb/send_mail.py
 RUN touch /srv/zimbraweb/pipe.log
 RUN chmod 777 /srv/zimbraweb/pipe.log
 
+#for creds in alpha
+RUN mkdir /secrets
+
 CMD ["postfix", "start-fg"]
