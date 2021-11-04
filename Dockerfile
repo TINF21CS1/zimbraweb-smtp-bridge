@@ -13,7 +13,7 @@ RUN postconf -e "maillog_file=/dev/stdout"
 
 #add script execution
 #https://contrid.net/server/mail-servers/postfix-catch-all-pipe-to-script
-RUN echo "* nobody@student.dhbw-mannheim.de" > /etc/postfix/virtual_aliases
+RUN touch /etc/postfix/virtual_aliases
 RUN echo "*  zimbrawebtransport:" > /etc/postfix/transport
 #not needed when texthash RUN postmap /etc/postfix/virtual_aliases
 #not needed when texthash RUN postmap /etc/postfix/transport
