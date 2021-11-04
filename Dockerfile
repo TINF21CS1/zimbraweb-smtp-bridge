@@ -13,8 +13,8 @@ RUN postconf -e "maillog_file=/dev/stdout"
 
 #add script execution
 #https://contrid.net/server/mail-servers/postfix-catch-all-pipe-to-script
-RUN echo "@student.dhbw-mannheim.de nobody@student.dhbw-mannheim.de" > /etc/postfix/virtual_aliases
-RUN echo "student.dhbw-mannheim.de  zimbrawebtransport:" > /etc/postfix/transport
+RUN echo "* nobody@student.dhbw-mannheim.de" > /etc/postfix/virtual_aliases
+RUN echo "*  zimbrawebtransport:" > /etc/postfix/transport
 #not needed when texthash RUN postmap /etc/postfix/virtual_aliases
 #not needed when texthash RUN postmap /etc/postfix/transport
 #zusammen mit -e muss bei echo $ escaped werden
@@ -30,7 +30,7 @@ RUN pip3 install --no-cache --upgrade pip setuptools
 RUN apk add git
 
 #install zimbraweb package from Github Repo
-RUN pip3 install git+https://github.com/cirosec-studis/python-zimbra@feature_emlparsing
+RUN pip3 install git+https://github.com/cirosec-studis/python-zimbra-web@feature_emlparsing
 
 #copy python script
 ADD ./files/send_mail.py /srv/zimbraweb/send_mail.py

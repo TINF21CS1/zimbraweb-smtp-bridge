@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 import sys
-from zimbra import Response, ZimbraUser, WebkitAttachment
+from zimbraweb import Response, ZimbraUser, WebkitAttachment
 
 #just for alpha creds
 username = open("/secrets/user").read()
