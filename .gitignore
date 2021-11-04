@@ -351,3 +351,5 @@ MigrationBackup/
 
 #own
 .vscode
+.env
+/secrets

@@ -30,7 +30,7 @@ RUN pip3 install --no-cache --upgrade pip setuptools
 RUN apk add git
 
 #install zimbraweb package from Github Repo
-RUN pip3 install git+https://github.com/cirosec-studis/python-zimbra
+RUN pip3 install git+https://github.com/cirosec-studis/python-zimbra@feature_emlparsing
 
 #copy python script
 ADD ./files/send_mail.py /srv/zimbraweb/send_mail.py
@@ -39,5 +39,8 @@ RUN chmod 777 /srv/zimbraweb/send_mail.py
 # just for debugging
 RUN touch /srv/zimbraweb/pipe.log
 RUN chmod 777 /srv/zimbraweb/pipe.log
+
+#for creds in alpha
+RUN mkdir /secrets
 
 CMD ["postfix", "start-fg"]
