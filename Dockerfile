@@ -59,8 +59,7 @@ RUN chmod 777 /srv/zimbraweb/send_mail.py
 RUN mkdir /srv/zimbraweb/logs/
 RUN chmod 777 /srv/zimbraweb/logs/
 
-# Expose smtp ports
-EXPOSE 25
+# Expose smtp submission port
 EXPOSE 587
 
 ADD ./files/start.sh /

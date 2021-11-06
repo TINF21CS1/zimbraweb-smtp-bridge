@@ -4,7 +4,7 @@ This Container allows users to send E-Mails via SMTP to a Zimbra Web Interface. 
 
 <span style="color: red;">This Container is still in development and should not be used in Production environments or for important E-Mails!</span>
 
-‼ Currently it only supports plain SMTP over Port 25 and one User per Container.<br />
+‼ Currently it only supports plain SMTP over Port 587, no TLS. **Your password is readable to anyone on the network** <br />
 ‼ It also only supports Plaintext E-Mails, no Attachments, until this is implemented in zimbraweb.<br />
 ‼ SMTP will also not return an error if the sending was unsuccessfull, you need to check the Postifx logs to see if it was successful.
 
@@ -17,5 +17,5 @@ Create a folder with the files `user` and `password` that contain exactly those.
 To start the container use the following command
 
 ```
-docker run -p 25:25 -v /path/to/secrets:/secrets jmlemmi/zimbraweb-smtp-bridge:a.1
+docker run -p 587:587 -v /path/to/secrets:/secrets jmlemmi/zimbraweb-smtp-bridge:a.1
 ```
