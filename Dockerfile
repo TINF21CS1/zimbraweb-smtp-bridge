@@ -4,9 +4,16 @@ FROM alpine:latest
 #RUN apk add --no-cache --update postfix ca-certificates socat acme.sh bash && \
 RUN apk add --no-cache --update postfix dovecot ca-certificates
 
-# Expose smtp ports
-EXPOSE 25
-EXPOSE 587
+#install python
+RUN apk add --update --no-cache python3 && ln -sf python3 /usr/bin/python
+RUN python3 -m ensurepip
+RUN pip3 install --no-cache --upgrade pip setuptools
+
+#install git
+RUN apk add git
+
+#install zimbraweb package from Github Repo
+RUN pip3 install git+https://github.com/cirosec-studis/python-zimbra-web@feature_emlparsing
 
 #postfix config
 RUN postconf -e mynetworks=0.0.0.0/0
@@ -24,7 +31,7 @@ RUN echo "*  zimbrawebtransport:" > /etc/postfix/transport
 #not needed when texthash RUN postmap /etc/postfix/virtual_aliases
 #not needed when texthash RUN postmap /etc/postfix/transport
 #zusammen mit -e muss bei echo $ escaped werden
-RUN echo -e "zimbrawebtransport   unix  -       n       n       -       -       pipe\n  flags=FR user=nobody argv=/srv/zimbraweb/send_mail.py\n  \${nexthop} \${user}" >> /etc/postfix/master.cf
+RUN echo -e "zimbrawebtransport   unix  -       n       n       -       -       pipe\n  flags=FR user=nobody argv=/srv/zimbraweb/send_mail.py\n  \${nexthop} \${user} \${sasl_username}" >> /etc/postfix/master.cf
 RUN echo -e "transport_maps = texthash:/etc/postfix/transport\nvirtual_alias_maps = texthash:/etc/postfix/virtual_aliases" >> /etc/postfix/main.cf
 
 RUN echo -e "submission inet n - y - - smtpd" >> /etc/postfix/master.cf
@@ -44,29 +51,18 @@ RUN chmod +x /srv/zimbraweb/zimbra_authentication.py
 # TODO: this should probably be instead chown postfix:postfix and rwx------? not sure
 RUN chmod 777 /srv/zimbraweb/zimbra_authentication.py
 
-
-#install python
-RUN apk add --update --no-cache python3 && ln -sf python3 /usr/bin/python
-RUN python3 -m ensurepip
-RUN pip3 install --no-cache --upgrade pip setuptools
-
-#install git
-RUN apk add git
-
-#install zimbraweb package from Github Repo
-RUN pip3 install git+https://github.com/cirosec-studis/python-zimbra-web@feature_emlparsing
-
 #copy python script
 ADD ./files/send_mail.py /srv/zimbraweb/send_mail.py
 RUN chmod 777 /srv/zimbraweb/send_mail.py
 
-# just for debugging
-RUN touch /srv/zimbraweb/pipe.log
-RUN chmod 777 /srv/zimbraweb/pipe.log
+# optionally mount this folder onto the host to get access to some log files, for debugging
+RUN mkdir /srv/zimbraweb/logs/
+RUN chmod 777 /srv/zimbraweb/logs/
 
-#for creds in alpha
-RUN mkdir /secrets
+# Expose smtp ports
+EXPOSE 25
+EXPOSE 587
 
-# RUN dovecot
-# CMD ["postfix", "start-fg"]
-CMD ["/bin/sh"]
+ADD ./files/start.sh /
+RUN chmod +x /start.sh
+CMD ["/start.sh"]
