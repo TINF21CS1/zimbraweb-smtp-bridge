@@ -2,14 +2,20 @@ FROM alpine:latest
 
 # Install dependencies
 #RUN apk add --no-cache --update postfix ca-certificates socat acme.sh bash && \
-RUN apk add --no-cache --update postfix ca-certificates
+RUN apk add --no-cache --update postfix dovecot ca-certificates
 
-# Expose smtp port
+# Expose smtp ports
 EXPOSE 25
+EXPOSE 587
 
 #postfix config
 RUN postconf -e mynetworks=0.0.0.0/0
 RUN postconf -e "maillog_file=/dev/stdout"
+RUN postconf -e smtpd_sasl_path=private/auth
+RUN postconf -e smtpd_sasl_type=dovecot
+RUN postconf -e smtpd_sasl_auth_enable=yes
+RUN postconf -e smtpd_delay_reject=yes
+RUN postconf -e smtpd_client_restrictions=permit_sasl_authenticated,reject
 
 #add script execution
 #https://contrid.net/server/mail-servers/postfix-catch-all-pipe-to-script
@@ -20,6 +26,24 @@ RUN echo "*  zimbrawebtransport:" > /etc/postfix/transport
 #zusammen mit -e muss bei echo $ escaped werden
 RUN echo -e "zimbrawebtransport   unix  -       n       n       -       -       pipe\n  flags=FR user=nobody argv=/srv/zimbraweb/send_mail.py\n  \${nexthop} \${user}" >> /etc/postfix/master.cf
 RUN echo -e "transport_maps = texthash:/etc/postfix/transport\nvirtual_alias_maps = texthash:/etc/postfix/virtual_aliases" >> /etc/postfix/main.cf
+
+RUN echo -e "submission inet n - y - - smtpd" >> /etc/postfix/master.cf
+RUN echo -e " -o syslog_name=postfix/submission" >> /etc/postfix/master.cf
+RUN echo -e " -o smtpd_sasl_auth_enable=yes" >> /etc/postfix/master.cf
+RUN echo -e " -o smtpd_sasl_path=private/auth" >> /etc/postfix/master.cf
+RUN echo -e " -o smtpd_client_restrictions=permit_sasl_authenticated,reject" >> /etc/postfix/master.cf
+
+#dovecot config
+ADD ./files/dovecot/conf.d/10-auth.conf /etc/dovecot/conf.d/10-auth.conf
+ADD ./files/dovecot/conf.d/10-master.conf /etc/dovecot/conf.d/10-master.conf
+ADD ./files/dovecot/conf.d/auth-checkpassword.conf.ext /etc/dovecot/conf.d/auth-checkpassword.conf.ext
+
+ADD ./files/zimbra_authentication.py /srv/zimbraweb/zimbra_authentication.py
+RUN chmod +x /srv/zimbraweb/zimbra_authentication.py
+
+# TODO: this should probably be instead chown postfix:postfix and rwx------? not sure
+RUN chmod 777 /srv/zimbraweb/zimbra_authentication.py
+
 
 #install python
 RUN apk add --update --no-cache python3 && ln -sf python3 /usr/bin/python
@@ -43,4 +67,6 @@ RUN chmod 777 /srv/zimbraweb/pipe.log
 #for creds in alpha
 RUN mkdir /secrets
 
-CMD ["postfix", "start-fg"]
+# RUN dovecot
+# CMD ["postfix", "start-fg"]
+CMD ["/bin/sh"]
