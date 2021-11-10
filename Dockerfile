@@ -13,7 +13,7 @@ RUN pip3 install --no-cache --upgrade pip setuptools
 RUN apk add git
 
 #install zimbraweb package from Github Repo
-RUN pip3 install git+https://github.com/cirosec-studis/python-zimbra-web@feature_emlparsing
+RUN pip3 install git+https://github.com/cirosec-studis/python-zimbra-web@develop
 
 #postfix config
 RUN postconf -e mynetworks=0.0.0.0/0
