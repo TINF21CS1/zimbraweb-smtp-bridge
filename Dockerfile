@@ -2,15 +2,17 @@ FROM alpine:latest
 
 # Install dependencies
 #RUN apk add --no-cache --update postfix ca-certificates socat acme.sh bash && \
-RUN apk add --no-cache --update postfix dovecot ca-certificates
+RUN apk add --no-cache --update postfix dovecot ca-certificates git gcc musl-dev linux-headers libmilter-dev
 
 #install python
-RUN apk add --update --no-cache python3 && ln -sf python3 /usr/bin/python
+RUN apk add --update --no-cache python3 python3-dev && ln -sf python3 /usr/bin/python
 RUN python3 -m ensurepip
 RUN pip3 install --no-cache --upgrade pip setuptools
 
-#install zimbraweb package from Github Repo
+
 RUN pip3 install zimbraweb
+
+RUN pip3 install git+https://github.com/sdgathman/pymilter
 
 
 #postfix config
@@ -21,6 +23,7 @@ RUN postconf -e smtpd_sasl_type=dovecot
 RUN postconf -e smtpd_sasl_auth_enable=yes
 RUN postconf -e smtpd_delay_reject=yes
 RUN postconf -e smtpd_client_restrictions=permit_sasl_authenticated,reject
+RUN postconf -e smtpd_milters=unix:/milter.sock
 
 #add script execution
 #https://contrid.net/server/mail-servers/postfix-catch-all-pipe-to-script
@@ -43,15 +46,9 @@ ADD ./files/dovecot/conf.d/10-auth.conf /etc/dovecot/conf.d/10-auth.conf
 ADD ./files/dovecot/conf.d/10-master.conf /etc/dovecot/conf.d/10-master.conf
 ADD ./files/dovecot/conf.d/auth-checkpassword.conf.ext /etc/dovecot/conf.d/auth-checkpassword.conf.ext
 
-ADD ./files/zimbra_authentication.py /srv/zimbraweb/zimbra_authentication.py
-RUN chmod +x /srv/zimbraweb/zimbra_authentication.py
-
-# TODO: this should probably be instead chown postfix:postfix and rwx------? not sure
-RUN chmod 777 /srv/zimbraweb/zimbra_authentication.py
-
-#copy python script
-ADD ./files/send_mail.py /srv/zimbraweb/send_mail.py
-RUN chmod 777 /srv/zimbraweb/send_mail.py
+#copy python scripts
+ADD ./files/*.py /srv/zimbraweb/
+RUN chmod 777 /srv/zimbraweb/*.py
 
 # optionally mount this folder onto the host to get access to some log files, for debugging
 RUN mkdir /srv/zimbraweb/logs/
