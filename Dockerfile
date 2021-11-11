@@ -9,11 +9,9 @@ RUN apk add --update --no-cache python3 && ln -sf python3 /usr/bin/python
 RUN python3 -m ensurepip
 RUN pip3 install --no-cache --upgrade pip setuptools
 
-#install git
-RUN apk add git
-
 #install zimbraweb package from Github Repo
-RUN pip3 install git+https://github.com/cirosec-studis/python-zimbra-web@feature_emlparsing
+RUN pip3 install zimbraweb
+
 
 #postfix config
 RUN postconf -e mynetworks=0.0.0.0/0
