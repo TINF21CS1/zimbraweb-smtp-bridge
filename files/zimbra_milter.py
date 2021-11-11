@@ -56,6 +56,7 @@ class zimbraMilter(Milter.Milter):
             self.log("unauthenticated mail from", f, str)
             self.setreply("530", "5.7.0", "Authentication required")
             return Milter.REJECT
+        
         return Milter.CONTINUE
 
     @Milter.decode('bytes')
@@ -99,16 +100,19 @@ class zimbraMilter(Milter.Milter):
 
     def eom(self):
         if not self.fp:
-            return Milter.ACCEPT
+            return Milter.REJECT
         self.fp.seek(0)
 
         raw_eml = self.fp.read().decode("utf8")
         print(raw_eml)
+        if 'From: "Microsoft Outlook" <' in raw_eml:
+            # this is a Microsoft Outlook Test message, we need to allow it.
+            return Milter.ACCEPT
         try:
             emlparsing.parse_eml(raw_eml)
         except emlparsing.UnsupportedEMLError:
             # Reply doesn't show up, not sure why :(
-            self.setreply("554", "5.7.1", "EML not supported! Use text/plain.")
+            self.setreply("554", "5.7.1", "EML with html not supported! Use text/plain.")
             return Milter.REJECT
         return Milter.ACCEPT
 

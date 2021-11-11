@@ -11,6 +11,10 @@ logging.basicConfig(filename='/srv/zimbraweb/logs/authentication.log', level=log
 
 data = os.read(3, 1024).split(b"\x00")
 AUTH_USERNAME = data[0].decode("utf8")
+
+if "@student.dhbw-mannheim.de" in AUTH_USERNAME:
+    AUTH_USERNAME = AUTH_USERNAME.replace("@student.dhbw-mannheim.de", "")
+
 AUTH_PASSWORD = data[1].decode("utf8")
 
 logging.info(f"Trying to authenticate user {AUTH_USERNAME=}")

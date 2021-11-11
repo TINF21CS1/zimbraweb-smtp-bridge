@@ -6,12 +6,21 @@ import logging
 from email.parser import Parser
 
 from zimbraweb import WebkitAttachment, ZimbraUser
-from zimbraweb import emlparsing
 
-logging.basicConfig(
-    filename='/srv/zimbraweb/logs/send_mail.log', level=logging.INFO)
+file_handler = logging.FileHandler(
+    filename='/srv/zimbraweb/logs/send_mail.log')
+stdout_handler = logging.StreamHandler(sys.stdout)
+handlers = [file_handler, stdout_handler]
+
+logging.basicConfig(handlers=handlers, level=logging.INFO)
+
+logging.info("send_mail started!")
 
 ZIMBRA_USERNAME = sys.argv[3]
+
+if "@student.dhbw-mannheim.de" in ZIMBRA_USERNAME:
+    ZIMBRA_USERNAME = ZIMBRA_USERNAME.replace("@student.dhbw-mannheim.de", "")
+    logging.error(f"New username: {ZIMBRA_USERNAME}")
 is_bounce = False
 
 raw_eml = sys.stdin.read()
@@ -60,8 +69,16 @@ if ZIMBRA_USERNAME.strip() == "":  # this is a bounce email
         result = send_as_user(user, payload, boundary)
         logging.info(f"Bounce sent: {result=}")
         exit(0)
+# special case: Outlook test email.
+elif parsed["From"] == f'"Microsoft Outlook" <{ZIMBRA_USERNAME}@student.dhbw-mannheim.de>':
+    logging.info("Sending outlook test email via text/plain")
+    user = get_auth_user(ZIMBRA_USERNAME)
+    result = user.send_mail(to=parsed["To"], subject=parsed["Subject"],
+                   body="Diese E-Mail-Nachricht wurde von Microsoft Outlook automatisch während des Testens der Kontoeinstellungen gesendet.")
+    logging.info(f"Outlook test email sent: {result=}")
+    exit(0 if result.success else 1)
 else:
-    if f"<{ZIMBRA_USERNAME}@student.dhbw-mannheim.de>" not in parsed.get("From"):
+    if f"{ZIMBRA_USERNAME}@student.dhbw-mannheim.de" not in parsed.get("From"):
         logging.error(
             f"User {ZIMBRA_USERNAME} tried to send email claiming to be {parsed.get('From')}")
         exit(0)
@@ -69,6 +86,6 @@ else:
     # don't bounce a bounce email or we'll end up in a loop
     failure_code = 1 if not is_bounce else 0
     user = get_auth_user(ZIMBRA_USERNAME)
-    payload, boundary = emlparsing.parse_eml(user, raw_eml)
-    result = send_as_user(user, payload, boundary)
+    result = user.send_eml(raw_eml)
+    logging.info(f"Sent mail, {result=}")
     exit(0 if result.success else failure_code)
