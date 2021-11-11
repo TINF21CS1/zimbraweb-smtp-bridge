@@ -105,10 +105,11 @@ class zimbraMilter(Milter.Milter):
         raw_eml = self.fp.read().decode("utf8")
         print(raw_eml)
         try:
-            pass
-            # emlparsing.try_parse(raw_eml)
-        except Exception as e:
-            return Milter.TEMPFAIL
+            emlparsing.parse_eml(raw_eml)
+        except emlparsing.UnsupportedEMLError:
+            # Reply doesn't show up, not sure why :(
+            self.setreply("554", "5.7.1", "EML not supported! Use text/plain.")
+            return Milter.REJECT
         return Milter.ACCEPT
 
     def close(self):
