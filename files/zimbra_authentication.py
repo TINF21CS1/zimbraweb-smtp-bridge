@@ -6,20 +6,23 @@ import pickle
 import logging
 
 from zimbraweb import ZimbraUser
+from zimbra_config import get_config
+
+CONFIG = get_config()
 
 logging.basicConfig(filename='/srv/zimbraweb/logs/authentication.log', level=logging.INFO)
 
 data = os.read(3, 1024).split(b"\x00")
 AUTH_USERNAME = data[0].decode("utf8")
 
-if "@student.dhbw-mannheim.de" in AUTH_USERNAME:
-    AUTH_USERNAME = AUTH_USERNAME.replace("@student.dhbw-mannheim.de", "")
+if f"@{CONFIG['email_domain']}" in AUTH_USERNAME:
+    AUTH_USERNAME = AUTH_USERNAME.replace(f"@{CONFIG['email_domain']}", "")
 
 AUTH_PASSWORD = data[1].decode("utf8")
 
 logging.info(f"Trying to authenticate user {AUTH_USERNAME=}")
 
-user = ZimbraUser("https://studgate.dhbw-mannheim.de")
+user = ZimbraUser(CONFIG['zimbra_host'])
 if user.login(AUTH_USERNAME, AUTH_PASSWORD):
     logging.info(f"successfully authenticated {AUTH_USERNAME=}")
     with open(f"/dev/shm/auth_{AUTH_USERNAME}", "wb") as f:

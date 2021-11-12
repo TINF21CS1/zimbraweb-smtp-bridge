@@ -50,9 +50,13 @@ ADD ./files/dovecot/conf.d/auth-checkpassword.conf.ext /etc/dovecot/conf.d/auth-
 ADD ./files/*.py /srv/zimbraweb/
 RUN chmod 777 /srv/zimbraweb/*.py
 
-# optionally mount this folder onto the host to get access to some log files, for debugging
+RUN mkdir /srv/zimbraweb/mnt/
+RUN chmod -R 777 /srv/zimbraweb/mnt/
+
 RUN mkdir /srv/zimbraweb/logs/
-RUN chmod 777 /srv/zimbraweb/logs/
+RUN chmod -R 777 /srv/zimbraweb/logs/
+
+VOLUME /srv/zimbraweb/mnt/
 
 # Expose smtp submission port
 EXPOSE 587

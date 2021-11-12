@@ -9,26 +9,21 @@ import os
 from io import BytesIO
 import tempfile
 from time import strftime
+import logging
 
 import Milter
 from Milter import milter
 
 from zimbraweb import emlparsing
 # syslog.openlog('milter')
-
+#
+file_handler = logging.FileHandler(filename='/srv/zimbraweb/logs/milter.log')
+stdout_handler = logging.StreamHandler(sys.stdout)
+handlers = [file_handler, stdout_handler]
+logging.basicConfig(handlers=handlers, level=logging.INFO)
 
 class zimbraMilter(Milter.Milter):
     # https://github.com/sdgathman/pymilter/blob/master/sample.py
-
-    def log(self, *msg):
-        print("%s [%d]" % (strftime('%Y%b%d %H:%M:%S'), self.id), end=None)
-        for i in msg:
-            try:
-                print(i, end=None)
-            except UnicodeEncodeError:
-                s = i.encode(encoding='utf-8', errors='surrogateescape')
-                print(s, end=None)
-        print()
 
     def __init__(self):
         self.tempname = None
@@ -51,12 +46,12 @@ class zimbraMilter(Milter.Milter):
         self.user = self.getsymval('{auth_authen}')
         self.auth_type = self.getsymval('{auth_type}')
         if self.user:
-            self.log("user", self.user, "sent mail from", f, str)
+            logging.info(f"user {self.user} sent mail from {f}")
         else:
-            self.log("unauthenticated mail from", f, str)
+            logging.warning(f"unauthenticated mail from {f}")
             self.setreply("530", "5.7.0", "Authentication required")
             return Milter.REJECT
-        
+
         return Milter.CONTINUE
 
     @Milter.decode('bytes')
@@ -64,7 +59,7 @@ class zimbraMilter(Milter.Milter):
         lname = name.lower()
         # log selected headers
         if lname in ('subject', 'x-mailer'):
-            self.log('%s: %s' % (name, val))
+            logging.debug('%s: %s' % (name, val))
         if self.fp:
             # add header to buffer
             self.fp.write(b"%s: %s\n" % (name.encode(), val))
@@ -112,7 +107,9 @@ class zimbraMilter(Milter.Milter):
             emlparsing.parse_eml(raw_eml)
         except emlparsing.UnsupportedEMLError:
             # Reply doesn't show up, not sure why :(
-            self.setreply("554", "5.7.1", "EML with html not supported! Use text/plain.")
+            logging.error("Unsupported EML.")
+            self.setreply("554", "5.7.1",
+                          "EML with html not supported! Use text/plain.")
             return Milter.REJECT
         return Milter.ACCEPT
 
@@ -125,7 +122,7 @@ class zimbraMilter(Milter.Milter):
         return Milter.CONTINUE
 
     def abort(self):
-        self.log("abort after %d body chars" % self.bodysize)
+        logging.debug("abort after %d body chars" % self.bodysize)
         return Milter.CONTINUE
 
 
@@ -180,10 +177,9 @@ def runmilter(name, socketname, timeout=0, rmsock=True):
     milter.opensocket(rmsock)
     start_seq = Milter._seq
 
-
     print("Changing chmod of socket to 777")
     os.chmod(socketname, 0o777)
-    
+
     try:
         milter.main()
     except milter.error:
