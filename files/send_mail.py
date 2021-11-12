@@ -11,7 +11,7 @@ from zimbra_config import get_config
 CONFIG = get_config()
 
 file_handler = logging.FileHandler(
-    filename='/srv/zimbraweb/mnt/logs/send_mail.log')
+    filename='/srv/zimbraweb/logs/send_mail.log')
 stdout_handler = logging.StreamHandler(sys.stdout)
 handlers = [file_handler, stdout_handler]
 

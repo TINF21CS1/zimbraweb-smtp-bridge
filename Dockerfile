@@ -52,7 +52,9 @@ RUN chmod 777 /srv/zimbraweb/*.py
 
 RUN mkdir /srv/zimbraweb/mnt/
 RUN chmod -R 777 /srv/zimbraweb/mnt/
-RUN mkdir /srv/zimbraweb/mnt/logs/
+
+RUN mkdir /srv/zimbraweb/logs/
+RUN chmod -R 777 /srv/zimbraweb/logs/
 
 VOLUME /srv/zimbraweb/mnt/
 

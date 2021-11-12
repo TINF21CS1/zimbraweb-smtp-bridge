@@ -17,7 +17,7 @@ from Milter import milter
 from zimbraweb import emlparsing
 # syslog.openlog('milter')
 #
-file_handler = logging.FileHandler(filename='/srv/zimbraweb/mnt/logs/milter.log')
+file_handler = logging.FileHandler(filename='/srv/zimbraweb/logs/milter.log')
 stdout_handler = logging.StreamHandler(sys.stdout)
 handlers = [file_handler, stdout_handler]
 logging.basicConfig(handlers=handlers, level=logging.INFO)
@@ -46,9 +46,9 @@ class zimbraMilter(Milter.Milter):
         self.user = self.getsymval('{auth_authen}')
         self.auth_type = self.getsymval('{auth_type}')
         if self.user:
-            logging.info("user", self.user, "sent mail from", f, str)
+            logging.info(f"user {self.user} sent mail from {f}")
         else:
-            logging.warning("unauthenticated mail from", f, str)
+            logging.warning(f"unauthenticated mail from {f}")
             self.setreply("530", "5.7.0", "Authentication required")
             return Milter.REJECT
 

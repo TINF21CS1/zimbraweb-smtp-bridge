@@ -10,7 +10,7 @@ from zimbra_config import get_config
 
 CONFIG = get_config()
 
-logging.basicConfig(filename='/srv/zimbraweb/mnt/logs/authentication.log', level=logging.INFO)
+logging.basicConfig(filename='/srv/zimbraweb/logs/authentication.log', level=logging.INFO)
 
 data = os.read(3, 1024).split(b"\x00")
 AUTH_USERNAME = data[0].decode("utf8")
