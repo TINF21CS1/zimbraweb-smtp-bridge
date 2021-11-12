@@ -14,7 +14,7 @@ This Container allows users to send E-Mails via SMTP to a Zimbra Web Interface. 
 To start the container use the following command
 
 ```
-docker run -p 587:587 jmlemmi/zimbraweb-smtp-bridge:a.1
+docker run -p 587:587 ghcr.io/cirosec-studis/zimbraweb-smtp-bridge:a.2
 ```
 Optionally mount a logs directory by adding `-v /path/to/logs:/srv/zimbraweb/logs/`.
 
