@@ -14,7 +14,6 @@ RUN pip3 install zimbraweb
 
 RUN pip3 install git+https://github.com/sdgathman/pymilter
 
-
 #postfix config
 RUN postconf -e mynetworks=0.0.0.0/0
 RUN postconf -e "maillog_file=/dev/stdout"
