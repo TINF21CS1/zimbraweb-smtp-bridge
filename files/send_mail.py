@@ -8,7 +8,7 @@ from email.parser import Parser
 from zimbraweb import WebkitAttachment, ZimbraUser
 
 file_handler = logging.FileHandler(
-    filename='/srv/zimbraweb/logs/send_mail.log')
+    filename='/srv/zimbraweb/mnt/logs/send_mail.log')
 stdout_handler = logging.StreamHandler(sys.stdout)
 handlers = [file_handler, stdout_handler]
 
@@ -74,7 +74,7 @@ elif parsed["From"] == f'"Microsoft Outlook" <{ZIMBRA_USERNAME}@student.dhbw-man
     logging.info("Sending outlook test email via text/plain")
     user = get_auth_user(ZIMBRA_USERNAME)
     result = user.send_mail(to=parsed["To"], subject=parsed["Subject"],
-                   body="Diese E-Mail-Nachricht wurde von Microsoft Outlook automatisch während des Testens der Kontoeinstellungen gesendet.")
+                            body="Diese E-Mail-Nachricht wurde von Microsoft Outlook automatisch während des Testens der Kontoeinstellungen gesendet.")
     logging.info(f"Outlook test email sent: {result=}")
     exit(0 if result.success else 1)
 else:
