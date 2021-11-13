@@ -14,8 +14,11 @@ This Container allows users to send E-Mails via SMTP to a Zimbra Web Interface. 
 To start the container use the following command
 
 ```
-docker run -p 587:587 ghcr.io/cirosec-studis/zimbraweb-smtp-bridge:a.2
+docker run -p 587:587 ghcr.io/cirosec-studis/zimbraweb-smtp-bridge
 ```
+
+If you're on a raspberry pi, note the section [Docker on Raspberry Pi](#docker-on-raspberry-pi).
+
 Optionally mount a logs directory by adding `-v /path/to/logs:/srv/zimbraweb/logs/`.
 
 You can now connect to the container with your SMTP client at localhost:587.
@@ -32,3 +35,20 @@ In Thunderbird you should go to Acccount Settings, select "Composition & Address
 ### Other clients
 
 You need to make sure your client sends emails in text/plain because Zimbra Web does not support HTML emails.
+
+### Docker on Raspberry Pi
+
+Note that currently the alpine image does not work on raspberry pi without the following tweak:
+
+```bash
+# Get signing keys to verify the new packages, otherwise they will not install
+rpi ~$ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 04EE7237B7D453EC 648ACFD622F3D138
+
+# Add the Buster backport repository to apt sources.list
+rpi ~$ echo 'deb http://httpredir.debian.org/debian buster-backports main contrib non-free' | sudo tee -a /etc/apt/sources.list.d/debian-backports.list
+
+rpi ~$ sudo apt update
+rpi ~$ sudo apt install libseccomp2 -t buster-backports
+```
+
+This fix is from https://blog.samcater.com/fix-workaround-rpi4-docker-libseccomp2-docker-20/. Alpine requires libseccomp2>2.4.2 but on debian buster has 2.3.6, this fix installes a newer version from the backports repository.
