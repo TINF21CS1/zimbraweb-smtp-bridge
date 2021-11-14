@@ -20,10 +20,10 @@ docker run -p 587:587 ghcr.io/cirosec-studis/zimbraweb-smtp-bridge:nightly
 
 The following tags are available:
 
-`ghcr.io/cirosec-studis/zimbraweb-smtp-bridge:nightly` - This builds from `main` every night so that changes in the zimbraweb package are pulled into the container. Use this one to stay up to date.
-`ghcr.io/cirosec-studis/zimbraweb-smtp-bridge:latest` - Latest tagged build
-`ghcr.io/cirosec-studis/zimbraweb-smtp-bridge:vX.Y.Z` - Version X.Y.Z (e.g. v1.0.0)
-`ghcr.io/cirosec-studis/zimbraweb-smtp-bridge:develop` - development build
+* `ghcr.io/cirosec-studis/zimbraweb-smtp-bridge:nightly` - This builds from `main` every night so that changes in the zimbraweb package are pulled into the container. Use this one to stay up to date.
+* `ghcr.io/cirosec-studis/zimbraweb-smtp-bridge:latest` - Latest tagged build
+* `ghcr.io/cirosec-studis/zimbraweb-smtp-bridge:vX.Y.Z` - Version X.Y.Z (e.g. v1.0.0)
+* `ghcr.io/cirosec-studis/zimbraweb-smtp-bridge:develop` - development build
 
 
 
