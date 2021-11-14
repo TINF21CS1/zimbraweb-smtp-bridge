@@ -31,6 +31,8 @@ Follow the prompts. The certificate and key should end up in `/etc/letsencrypt/l
 
 ### Enabling TLS in the Container
 
+The following commands assume your Docker container is named `smtp_bride`. Substitute as necessary.
+
 Copy the certificate and key into the container:
 ```
 # docker cp /etc/letsencrypt/live/<your-server-domain>/fullchain.pem smtp_bridge:/srv/zimbraweb/ssl_certificate.pem
