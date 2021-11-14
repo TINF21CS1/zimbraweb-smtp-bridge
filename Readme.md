@@ -9,7 +9,7 @@ This Container allows users to send E-Mails via SMTP to a Zimbra Web Interface. 
 
 ## Public Bridge
 
-There is a public server available at dhbw-mannheim.email at port 2525. Connect to it via SMTP with STARTTLS. For increased security we recommend hosting the Bridge yourself if you have a server available, more on that below.
+There is a public server available at dhbw-mannheim.email at port 2525. Connect to it via SMTP with STARTTLS. For increased security we recommend hosting the Bridge yourself if you have a server available, [more on that below](#self-hosting).
 
 You can use the following settings:
 
