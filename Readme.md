@@ -13,8 +13,38 @@ This Container allows users to send E-Mails via SMTP to a Zimbra Web Interface. 
 To start the container use the following command
 
 ```
-docker run -p 587:587 ghcr.io/cirosec-studis/zimbraweb-smtp-bridge:nightly
+docker run --name smtp_bridge -p 587:587 ghcr.io/cirosec-studis/zimbraweb-smtp-bridge:nightly
 ```
+
+### TLS Support
+
+### Getting a certificate
+
+To enable TLS you first need to generate a certificate. You can do this on the host machine using [`certbot`](https://certbot.eff.org/), here's how to do it in Ubuntu:
+
+```bash
+$ sudo apt install certbot
+$ sudo certbot certonly --standalone -d <your-server-domain>
+```
+
+Follow the prompts. The certificate and key should end up in `/etc/letsencrypt/live/<your-server-domain>/fullchain.pem` and `/etc/letsencrypt/live/<your-server-domain>/privkey.pem`. 
+
+### Enabling TLS in the Container
+
+Copy the certificate and key into the container:
+```
+# docker cp /etc/letsencrypt/live/<your-server-domain>/fullchain.pem smtp_bridge:/srv/zimbraweb/ssl_certificate.pem
+# docker cp /etc/letsencrypt/live/<your-server-domain>/privkey.pem smtp_bridge:/srv/zimbraweb/private_key.pem
+```
+
+Enable TLS in the Container:
+```
+# docker run --it smtp_bridge /tls.sh
+```
+
+Follow the prompt again, you should be able accept the default values for the certificate and key location.
+
+That's it, TLS is now enabled! Use STARTTLS on port 2525.
 
 ### Docker Tags
 
