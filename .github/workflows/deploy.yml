@@ -6,7 +6,8 @@ on:
     tags:        
       - v*
     branches:
-      - '**'
+      - main
+      - develop
   schedule:
     - cron: "0 0  * * *"
 
