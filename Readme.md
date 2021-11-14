@@ -14,8 +14,19 @@ This Container allows users to send E-Mails via SMTP to a Zimbra Web Interface. 
 To start the container use the following command
 
 ```
-docker run -p 587:587 ghcr.io/cirosec-studis/zimbraweb-smtp-bridge
+docker run -p 587:587 ghcr.io/cirosec-studis/zimbraweb-smtp-bridge:nightly
 ```
+
+### Docker Tags
+
+The following tags are available:
+
+`ghcr.io/cirosec-studis/zimbraweb-smtp-bridge:nightly` - This builds from `main` every night so that changes in the zimbraweb package are pulled into the container. Use this one to stay up to date.
+`ghcr.io/cirosec-studis/zimbraweb-smtp-bridge:latest` - Latest tagged build
+`ghcr.io/cirosec-studis/zimbraweb-smtp-bridge:vX.Y.Z` - Version X.Y.Z (e.g. v1.0.0)
+`ghcr.io/cirosec-studis/zimbraweb-smtp-bridge:develop` - development build
+
+
 
 If you're on a raspberry pi, note the section [Docker on Raspberry Pi](#docker-on-raspberry-pi).
 
