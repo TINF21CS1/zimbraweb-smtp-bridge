@@ -1,18 +1,17 @@
 #!/bin/sh
-echo "NOTE: none of these parameters are verified. If you screw something up, run the script again. If you want to remove TLS you need to reset the container."
 
-read -p 'What domain is this server running on? ' hostname
+certfile=/tls/cert.pem
+keyfile=/tls/key.pem
 
-read -p 'Where is the domain certificate located (within the docker container)? [default: /srv/zimbraweb/ssl_certificate.pem]: ' certfile
-certfile=${certfile:-/srv/zimbraweb/ssl_certificate.pem}
+if [ ! -f "$certfile" ]; then
+    # generate a self signed certificate (valid for 10 years)
+    openssl req -x509 -newkey rsa:4096 -keyout $keyfile -out $certfile -sha256 -days 3650 -nodes -subj "/CN=$HOSTNAME"
+fi
 
-read -p 'Where is the private key located (within the docker container)? [default: /srv/zimbraweb/private_key.pem]: ' keyfile
-keyfile=${keyfile:-/srv/zimbraweb/private_key.pem}
+chmod 600 $certfile
+chmod 600 $keyfile
 
-chmod 777 ${keyfile}
-chmod 777 ${certfile}
-
-postconf -e myhostname=$hostname
+postconf -e myhostname=$HOSTNAME
 postconf -e "smtpd_tls_cert_file = ${certfile}"
 postconf -e "smtpd_tls_key_file = ${keyfile}"
 postconf -e 'smtp_tls_security_level = may'

@@ -39,40 +39,32 @@ In Thunderbird you should go to Acccount Settings, select "Composition & Address
 To start the container use the following command
 
 ```
-docker run --name smtp_bridge -p 587:587 ghcr.io/cirosec-studis/zimbraweb-smtp-bridge:nightly
+docker run --name smtp_bridge -h <your_domain_name> -p 587:587 ghcr.io/cirosec-studis/zimbraweb-smtp-bridge:nightly
 ```
+
+If you do not have a domain name associated with the server, you can use whatever hostname you want, e.g. "smtp_bridge.local".
 
 ### TLS Support
 
-### Getting a certificate
+TLS is enabled by default, using a self-signed certificate for the hostname you provided. This will be enough in most cases, you will just need to accept the self-signed certificate in your email client. Thunderbird and Outlook will tell you that the certificate could not be verified. You will need to add an exception.
 
-To enable TLS you first need to generate a certificate. You can do this on the host machine using [`certbot`](https://certbot.eff.org/), here's how to do it in Ubuntu:
+#### CA-signed certificates
 
-```bash
-$ sudo apt install certbot
-$ sudo certbot certonly --standalone -d <your-server-domain>
+If you want to use a certificate signed by a Certificate Authority, e.g. Let's Encrypt, you can do that.
+
+You already need to have a certificate and a private key file. You can get them with [`certbot`](https://certbot.eff.org/lets-encrypt/). Usually running `sudo certbot certonly --standalone -d <your-server-domain>` will do the trick. The certificate and key should end up in `/etc/letsencrypt/live/<your-server-domain>/fullchain.pem` and `/etc/letsencrypt/live/<your-server-domain>/privkey.pem`.
+
+Make sure to run the docker container with the same hostname as the certificate you are using.
+
+Put the certificate and key into a folder on your host and name them `cert.pem` and `key.pem` respectively.
+
+Then you can use the following command to start the container with the certificate and key you just created:
+
+```
+docker run -v /host/path/to/tls/folder/:/tls/ --name smtp_bridge -h <your_domain_name> -p 587:587 ghcr.io/cirosec-studis/zimbraweb-smtp-bridge:nightly
 ```
 
-Follow the prompts. The certificate and key should end up in `/etc/letsencrypt/live/<your-server-domain>/fullchain.pem` and `/etc/letsencrypt/live/<your-server-domain>/privkey.pem`. 
-
-### Enabling TLS in the Container
-
-The following commands assume your Docker container is named `smtp_bride`. Substitute as necessary.
-
-Copy the certificate and key into the container:
-```
-# docker cp /etc/letsencrypt/live/<your-server-domain>/fullchain.pem smtp_bridge:/srv/zimbraweb/ssl_certificate.pem
-# docker cp /etc/letsencrypt/live/<your-server-domain>/privkey.pem smtp_bridge:/srv/zimbraweb/private_key.pem
-```
-
-Enable TLS in the Container:
-```
-# docker run --it smtp_bridge /tls.sh
-```
-
-Follow the prompt again, you should be able accept the default values for the certificate and key location.
-
-That's it, TLS is now enabled! Use STARTTLS on port 2525.
+That's it, the container will now use the signed TLS certificate.
 
 ### Docker Tags
 
