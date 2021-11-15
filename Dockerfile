@@ -14,7 +14,6 @@ RUN pip3 install zimbraweb
 
 RUN pip3 install git+https://github.com/sdgathman/pymilter
 
-
 #postfix config
 RUN postconf -e mynetworks=0.0.0.0/0
 RUN postconf -e "maillog_file=/dev/stdout"
@@ -50,13 +49,22 @@ ADD ./files/dovecot/conf.d/auth-checkpassword.conf.ext /etc/dovecot/conf.d/auth-
 ADD ./files/*.py /srv/zimbraweb/
 RUN chmod 777 /srv/zimbraweb/*.py
 
-# optionally mount this folder onto the host to get access to some log files, for debugging
+RUN mkdir /srv/zimbraweb/mnt/
+RUN chmod -R 777 /srv/zimbraweb/mnt/
+
 RUN mkdir /srv/zimbraweb/logs/
-RUN chmod 777 /srv/zimbraweb/logs/
+RUN chmod -R 777 /srv/zimbraweb/logs/
+
+VOLUME /srv/zimbraweb/mnt/
 
 # Expose smtp submission port
 EXPOSE 587
 
 ADD ./files/start.sh /
 RUN chmod +x /start.sh
+
+ADD ./files/tls.sh /
+RUN chmod +x /tls.sh
+RUN mkdir /tls/
+
 CMD ["/start.sh"]
