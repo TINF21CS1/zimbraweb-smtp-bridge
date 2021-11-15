@@ -65,4 +65,6 @@ RUN chmod +x /start.sh
 
 ADD ./files/tls.sh /
 RUN chmod +x /tls.sh
+RUN mkdir /tls/
+
 CMD ["/start.sh"]
