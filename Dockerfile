@@ -9,9 +9,7 @@ RUN apk add --update --no-cache python3 python3-dev && ln -sf python3 /usr/bin/p
 RUN python3 -m ensurepip
 RUN pip3 install --no-cache --upgrade pip setuptools
 
-
 RUN pip3 install zimbraweb
-
 RUN pip3 install git+https://github.com/sdgathman/pymilter
 
 #postfix config
