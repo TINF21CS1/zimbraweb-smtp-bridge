@@ -4,7 +4,6 @@ This Container allows users to send E-Mails via SMTP to a Zimbra Web Interface. 
 
 <span style="color: red;">This Container is still in development and should not be used in Production environments or for important E-Mails!</span>
 
-‼ Currently it only supports plain SMTP over Port 587, no TLS. **Your password is readable to anyone on the network** <br />
 ‼ It only supports Plaintext E-Mails, and Attachments, but not HTML or RTF-Mails. This is due to a restriction in the Zimbra Webinterface<br />
 
 ## Public Bridge
