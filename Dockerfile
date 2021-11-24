@@ -57,6 +57,12 @@ RUN chmod -R 777 /srv/zimbraweb/logs/
 
 VOLUME /srv/zimbraweb/mnt/
 
+# Add crontab to delete auth tokens from memory
+RUN crontab -l /cron
+RUN echo "* * * * * find /dev/shm/ -name auth_* -type f -perm 444 -mmin +3 -delete" >> /cron
+RUN crontab /cron
+RUN rm /cron
+
 # Expose smtp submission port
 EXPOSE 587
 

@@ -45,6 +45,9 @@ class zimbraMilter(Milter.Milter):
         self.bodysize = 0
         self.user = self.getsymval('{auth_authen}')
         self.auth_type = self.getsymval('{auth_type}')
+        if "@" in self.user:
+            logging.warning(f"user {self.user} didn't rtfm.")
+            self.setreply("530", "5.7.0", "Your username contains the domain, remove it.")
         if self.user:
             logging.info(f"user {self.user} sent mail from {f}")
         else:
@@ -119,6 +122,8 @@ class zimbraMilter(Milter.Milter):
             os.remove(self.tempname)  # remove in case session aborted
         if self.fp:
             self.fp.close()
+        if os.path.isfile(f"/dev/shm/auth_{self.user}"):
+            os.chmod(f"/dev/shm/auth_{self.user}", 0o444)
         return Milter.CONTINUE
 
     def abort(self):
