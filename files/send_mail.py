@@ -5,7 +5,7 @@ import pickle
 import logging
 from email.parser import Parser
 
-from zimbraweb import WebkitAttachment, ZimbraUser
+from zimbraweb import WebkitAttachment, ZimbraUser, emlparsing
 from zimbra_config import get_config
 
 CONFIG = get_config()
@@ -53,7 +53,8 @@ def send_as_user(user, payload, boundary):
     return result
 
 
-if ZIMBRA_USERNAME.strip() == "":  # this is a bounce email
+# this is a bounce email
+if ZIMBRA_USERNAME.strip() == "":
     RECEIVER = sys.argv[2]
     if not os.path.isfile(f"/dev/shm/auth_{RECEIVER}"):
         logging.error(
@@ -72,6 +73,7 @@ if ZIMBRA_USERNAME.strip() == "":  # this is a bounce email
         result = send_as_user(user, payload, boundary)
         logging.info(f"Bounce sent: {result=}")
         exit(0)
+
 # special case: Outlook test email.
 elif parsed["From"] == f'"Microsoft Outlook" <{ZIMBRA_USERNAME}@{CONFIG["email_domain"]}>':
     logging.info("Sending outlook test email via text/plain")
@@ -80,6 +82,14 @@ elif parsed["From"] == f'"Microsoft Outlook" <{ZIMBRA_USERNAME}@{CONFIG["email_d
                             body="Diese E-Mail-Nachricht wurde von Microsoft Outlook automatisch während des Testens der Kontoeinstellungen gesendet.")
     logging.info(f"Outlook test email sent: {result=}")
     exit(0 if result.success else 1)
+
+# html mail via smtp relay
+# TODO: only if config for fallback is set to true
+elif emlparsing.is_parsable(raw_eml):
+    os.system(f'echo {raw_eml} | sendmail -f "relay@dhbw-mail.julian-lemmerich.de" {parsed["To"]}')
+    
+
+# default: send mail via Zimbra
 else:
     if f"{ZIMBRA_USERNAME}@{CONFIG['email_domain']}" not in parsed.get("From"):
         logging.error(

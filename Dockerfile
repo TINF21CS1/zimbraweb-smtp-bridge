@@ -10,7 +10,8 @@ RUN python3 -m ensurepip; pip3 install --no-cache --upgrade pip setuptools
 RUN pip3 install zimbraweb git+https://github.com/sdgathman/pymilter
 
 #postfix config
-RUN postconf -e mynetworks=0.0.0.0/0; postconf -e "maillog_file=/dev/stdout"; postconf -e smtpd_sasl_path=private/auth; postconf -e smtpd_sasl_type=dovecot; postconf -e smtpd_sasl_auth_enable=yes; postconf -e smtpd_delay_reject=yes; postconf -e smtpd_client_restrictions=permit_sasl_authenticated,reject; postconf -e smtpd_milters=unix:/milter.sock
+RUN postconf -e mynetworks=0.0.0.0/0; postconf -e "maillog_file=/dev/stdout"; postconf -e smtpd_sasl_path=private/auth; postconf -e smtpd_sasl_type=dovecot; postconf -e smtpd_sasl_auth_enable=yes; postconf -e smtpd_delay_reject=yes; postconf -e smtpd_client_restrictions=permit_sasl_authenticated,reject
+# RUN postconf -e smtpd_milters=unix:/milter.sock
 
 #add script execution
 #https://contrid.net/server/mail-servers/postfix-catch-all-pipe-to-script
@@ -19,6 +20,10 @@ RUN echo "*  zimbrawebtransport:" > /etc/postfix/transport
 #zusammen mit -e muss bei echo $ escaped werden
 RUN echo -e "zimbrawebtransport   unix  -       n       n       -       -       pipe\n  flags=FR user=nobody argv=/srv/zimbraweb/send_mail.py\n  \${nexthop} \${user} \${sasl_username}" >> /etc/postfix/master.cf
 RUN echo -e "transport_maps = texthash:/etc/postfix/transport\nvirtual_alias_maps = texthash:/etc/postfix/virtual_aliases" >> /etc/postfix/main.cf
+
+#send sender dependent relay host
+RUN echo -e "relay@dhbw-mail.julian-lemmerich.de  [172.17.0.2]:25" >> /etc/postfix/relay_by_sender
+RUN echo -e "sender_dependent_relayhost_maps = texthash:/etc/postfix/relay_by_sender" >> /etc/postfix/main.cf
 
 RUN echo -e "submission inet n - y - - smtpd" >> /etc/postfix/master.cf; echo -e " -o syslog_name=postfix/submission" >> /etc/postfix/master.cf; echo -e " -o smtpd_sasl_auth_enable=yes" >> /etc/postfix/master.cf; echo -e " -o smtpd_sasl_path=private/auth" >> /etc/postfix/master.cf; echo -e " -o smtpd_client_restrictions=permit_sasl_authenticated,reject" >> /etc/postfix/master.cf
 
