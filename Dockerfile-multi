@@ -1,0 +1,45 @@
+FROM ghcr.io/cirosec-studis/zimbraweb-smtp-bridge:latest AS base
+
+FROM alpine:latest
+
+# Install dependencies
+RUN apk add --no-cache --update postfix dovecot ca-certificates git gcc musl-dev linux-headers libmilter-dev
+
+#install python
+RUN apk add --update --no-cache python3 python3-dev && ln -sf python3 /usr/bin/python
+RUN python3 -m ensurepip; pip3 install --no-cache --upgrade pip setuptools
+
+RUN pip3 install zimbraweb git+https://github.com/sdgathman/pymilter
+
+#dovecot config
+ADD ./files/dovecot/conf.d/ /etc/dovecot/conf.d/
+
+#copy python scripts
+ADD ./files/*.py /srv/zimbraweb/
+RUN chmod 777 /srv/zimbraweb/*.py
+
+RUN mkdir /srv/zimbraweb/mnt/ /srv/zimbraweb/logs/; chmod -R 777 /srv/zimbraweb/mnt/; chmod -R 777 /srv/zimbraweb/logs/
+
+VOLUME /srv/zimbraweb/mnt/
+
+# Add crontab to delete auth tokens from memory
+RUN crontab -l /cron
+RUN echo "* * * * * find /dev/shm/ -name auth_* -type f -perm 444 -mmin +3 -delete" >> /cron
+RUN crontab /cron
+RUN rm /cron
+
+# at this point the regular container starts postconf. In this build we will copy the settings from the regular container in its own postfix folder, since the "default" postfix will be the null instance
+
+RUN postconf -e "maillog_file=/var/log/maillog_null"
+RUN postconf -e "master_service_disable = inet"
+RUN postconf -e "local_transport = error:5.1.1 Mailbox unavailable"
+RUN postconf -e "relayhost = [172.17.0.2]"
+
+CMD postfix start
+
+####
+#RUN postmulti -e init
+#RUN postmulti -I postfix-zimbra -G mta -e create
+
+# getting zimbra postfix config from regular contianer
+#COPY --from=base /etc/postfix/ /etc/postfix-zimbra/
