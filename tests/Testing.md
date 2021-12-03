@@ -35,3 +35,8 @@ Command for sending mail.
 sendmail -f "s212689@student.dhbw-mannheim.de" s212689@student.dhbw-mannheim.de < html.eml
 ```
 -f is "from", the other is the recipient
+
+Sending mail from other instance:
+```bash
+postmulti -i postfix-zimbra -x sendmail -f "s212689@student.dhbw-mannheim.de" s212689@student.dhbw-mannheim.de < html.eml
+```

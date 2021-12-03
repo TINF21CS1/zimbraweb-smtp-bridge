@@ -85,8 +85,8 @@ elif parsed["From"] == f'"Microsoft Outlook" <{ZIMBRA_USERNAME}@{CONFIG["email_d
 
 # html mail via smtp relay
 # TODO: only if config for fallback is set to true
-elif emlparsing.is_parsable(raw_eml):
-    os.system(f'echo {raw_eml} | sendmail -f "relay@dhbw-mail.julian-lemmerich.de" {parsed["To"]}')
+#elif emlparsing.is_parsable(raw_eml):
+#    os.system(f'echo {raw_eml} | sendmail -f "relay@dhbw-mail.julian-lemmerich.de" {parsed["To"]}')
     
 
 # default: send mail via Zimbra
