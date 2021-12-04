@@ -15,12 +15,16 @@ import Milter
 from Milter import milter
 
 from zimbraweb import emlparsing
+from zimbra_config import get_config
+
 # syslog.openlog('milter')
 #
 file_handler = logging.FileHandler(filename='/srv/zimbraweb/logs/milter.log')
 stdout_handler = logging.StreamHandler(sys.stdout)
 handlers = [file_handler, stdout_handler]
 logging.basicConfig(handlers=handlers, level=logging.INFO)
+
+CONFIG = get_config()
 
 class zimbraMilter(Milter.Milter):
     # https://github.com/sdgathman/pymilter/blob/master/sample.py
@@ -106,14 +110,19 @@ class zimbraMilter(Milter.Milter):
         if 'From: "Microsoft Outlook" <' in raw_eml:
             # this is a Microsoft Outlook Test message, we need to allow it.
             return Milter.ACCEPT
+        #TODO use emlparsing.is_parsable() when released in zimbraweb v2.1
         try:
             emlparsing.parse_eml(raw_eml)
         except emlparsing.UnsupportedEMLError:
-            # Reply doesn't show up, not sure why :(
-            logging.error("Unsupported EML.")
-            self.setreply("554", "5.7.1",
-                          "EML with html not supported! Use text/plain.")
-            return Milter.REJECT
+            if CONFIG['smtp_fallback'] == "enabled":
+                logging.info("Zimbra Unparsable EML, but SMTP relay is activated")
+                return Milter.ACCEPT
+            else:
+                # Reply doesn't show up, not sure why :(
+                logging.error("Unsupported EML.")
+                self.setreply("554", "5.7.1",
+                            "EML with html not supported! Use text/plain or configure smtp_relay.")
+                return Milter.REJECT
         return Milter.ACCEPT
 
     def close(self):

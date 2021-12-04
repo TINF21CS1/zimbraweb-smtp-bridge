@@ -103,11 +103,10 @@ elif parsed["From"] == f'"Microsoft Outlook" <{ZIMBRA_USERNAME}@{CONFIG["email_d
     logging.info(f"Outlook test email sent: {result=}")
     exit(0 if result.success else 1)
 
-# html mail via local null instance
-# TODO: only if config for fallback is set to true
-elif not is_parsable(raw_eml):
+# html mail via smtp relay, if smtpfallback is enabled
+elif not is_parsable(raw_eml) and CONFIG['smtp_fallback'] == "enabled":
     logging.info("Mail not parsable by Zimbra. Using SMTP relay instead.")
-    with smtplib.SMTP('172.17.0.2') as s:
+    with smtplib.SMTP(CONFIG['smtp_fallback_relay_host']) as s:
         s.send_message(parsed)
 
 # default: send mail via Zimbra

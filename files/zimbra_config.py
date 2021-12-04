@@ -47,6 +47,8 @@ def create_config():
     config = {
         "zimbra_host": "https://studgate.dhbw-mannheim.de",
         "email_domain": "student.dhbw-mannheim.de",
+        "smtp_fallback": "enabled", #should be default disabled, but for testing it is enabled
+        "smtp_fallback_relay_host": "172.17.0.2",
     }
 
     if os.isatty(0):
