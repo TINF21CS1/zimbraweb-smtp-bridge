@@ -35,7 +35,7 @@ RUN postconf -e "maillog_file=/var/log/maillog_null"
 RUN postconf -e "master_service_disable = inet"
 RUN postconf -e "local_transport = error:5.1.1 Mailbox unavailable"
 RUN postconf -e "relayhost = [172.17.0.2]"
-#RUN postconf -e "authorized_submit_users = root, posttransport"
+#RUN postconf -e "authorized_submit_users = root, posttransport" this shouldnt be needed. by default all users are allowed to submit mail
 
 ####
 RUN postmulti -e init

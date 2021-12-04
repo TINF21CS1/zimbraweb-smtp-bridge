@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 import sys
-import os
+import os, subprocess
 import pickle
 import logging
 from email.parser import Parser
@@ -105,8 +105,13 @@ elif parsed["From"] == f'"Microsoft Outlook" <{ZIMBRA_USERNAME}@{CONFIG["email_d
 # html mail via local null instance
 # TODO: only if config for fallback is set to true
 elif not is_parsable(raw_eml):
-    logging.info("Mail is unparsable. Using Relay.")
-    os.system(f'echo {raw_eml} | sendmail -f "{parsed["From"]}" {parsed["To"]}')
+    logging.info("Mail is unparsable for zimbra. Using Relay instead.")
+    childprocess = subprocess.Popen(
+        ["/usr/sbin/sendmail", "-f", "s212689@student.dhbw-mannheim.de", "s212689@student.dhbw-mannheim.de"], 
+        stdin=subprocess.PIPE
+        )
+    childprocess.stdin.write(raw_eml.encode())
+    childprocess.stdin.close()
 
 # default: send mail via Zimbra
 else:
