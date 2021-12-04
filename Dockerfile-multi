@@ -10,7 +10,7 @@ RUN python3 -m ensurepip; pip3 install --no-cache --upgrade pip setuptools
 RUN pip3 install zimbraweb git+https://github.com/sdgathman/pymilter
 
 #dovecot config
-ADD ./files/dovecot/conf.d/ /etc/dovecot/conf.d/
+ADD ./files/dovecot-multi/conf.d/ /etc/dovecot/conf.d/
 
 #copy python scripts
 ADD ./files/*.py /srv/zimbraweb/
