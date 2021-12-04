@@ -115,7 +115,7 @@ class zimbraMilter(Milter.Milter):
             emlparsing.parse_eml(raw_eml)
         except emlparsing.UnsupportedEMLError:
             if CONFIG['smtp_fallback'] == "enabled":
-                logging.info("Zimbra Unparsable EML, but SMTP relay is activated")
+                logging.info("Zimbra Unparsable EML, but SMTP relay is enabled")
                 return Milter.ACCEPT
             else:
                 # Reply doesn't show up, not sure why :(
