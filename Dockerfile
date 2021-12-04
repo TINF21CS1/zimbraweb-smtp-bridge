@@ -27,7 +27,8 @@ RUN crontab /cron
 RUN rm /cron
 
 #postfix config
-RUN postconf -e mynetworks=0.0.0.0/0; postconf -e "maillog_file=/dev/stdout"; postconf -e smtpd_sasl_path=private/auth; postconf -e smtpd_sasl_type=dovecot; postconf -e smtpd_sasl_auth_enable=yes; postconf -e smtpd_delay_reject=yes; postconf -e smtpd_client_restrictions=permit_sasl_authenticated,reject; postconf -e smtpd_milters=unix:/milter.sock
+RUN postconf -e mynetworks=0.0.0.0/0; postconf -e "maillog_file=/dev/stdout"; postconf -e smtpd_sasl_path=private/auth; postconf -e smtpd_sasl_type=dovecot; postconf -e smtpd_sasl_auth_enable=yes; postconf -e smtpd_delay_reject=yes; postconf -e smtpd_client_restrictions=permit_sasl_authenticated,reject
+#postconf -e smtpd_milters=unix:/milter.sock
 
 #add script execution
 #https://contrid.net/server/mail-servers/postfix-catch-all-pipe-to-script
