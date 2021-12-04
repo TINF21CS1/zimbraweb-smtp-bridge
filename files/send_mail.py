@@ -8,6 +8,25 @@ from email.parser import Parser
 from zimbraweb import WebkitAttachment, ZimbraUser, emlparsing
 from zimbra_config import get_config
 
+#### TEMP
+#this function should come from zimbraweb.emlparsing in version 2.1, but is temporarily availible directly for testing
+
+def is_parsable(eml: str) -> bool:
+    """Check eml string for parsability
+    Args:
+        eml (str): The EML string to parse.
+    Returns:
+        bool if parse_eml() will throw an error.
+    """
+
+    try:
+        emlparsing.parse_eml(eml)
+        return True
+    except emlparsing.UnsupportedEMLError:
+        return False
+
+####
+
 CONFIG = get_config()
 
 file_handler = logging.FileHandler(
@@ -83,11 +102,11 @@ elif parsed["From"] == f'"Microsoft Outlook" <{ZIMBRA_USERNAME}@{CONFIG["email_d
     logging.info(f"Outlook test email sent: {result=}")
     exit(0 if result.success else 1)
 
-# html mail via smtp relay
+# html mail via local null instance
 # TODO: only if config for fallback is set to true
-#elif emlparsing.is_parsable(raw_eml):
-#    os.system(f'echo {raw_eml} | sendmail -f "relay@dhbw-mail.julian-lemmerich.de" {parsed["To"]}')
-    
+elif not is_parsable(raw_eml):
+    logging.info("Mail is unparsable. Using Relay.")
+    os.system(f'echo {raw_eml} | sendmail -f "{parsed["From"]}" {parsed["To"]}')
 
 # default: send mail via Zimbra
 else:

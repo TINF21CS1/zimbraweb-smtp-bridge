@@ -28,11 +28,14 @@ RUN rm /cron
 
 #### at this point the regular container starts postconf. In this build we will copy the settings from the regular container in its own postfix folder, since the "default" postfix will be the null instance
 
+#add user to run postfix transport
+RUN adduser --disabled-password posttransport
+
 RUN postconf -e "maillog_file=/var/log/maillog_null"
 RUN postconf -e "master_service_disable = inet"
 RUN postconf -e "local_transport = error:5.1.1 Mailbox unavailable"
 RUN postconf -e "relayhost = [172.17.0.2]"
-#RUN postconf -e "authorized_submit_users = root"
+#RUN postconf -e "authorized_submit_users = root, posttransport"
 
 ####
 RUN postmulti -e init
@@ -50,7 +53,7 @@ RUN postconf -c /etc/postfix-zimbra/ -e "master_service_disable =" "authorized_s
 RUN touch /etc/postfix-zimbra/virtual_aliases
 RUN echo "*  zimbrawebtransport:" > /etc/postfix-zimbra/transport
 #zusammen mit -e muss bei echo $ escaped werden
-RUN echo -e "zimbrawebtransport   unix  -       n       n       -       -       pipe\n  flags=FR user=nobody argv=/srv/zimbraweb/send_mail.py\n  \${nexthop} \${user} \${sasl_username}" >> /etc/postfix-zimbra/master.cf
+RUN echo -e "zimbrawebtransport   unix  -       n       n       -       -       pipe\n  flags=FR user=posttransport argv=/srv/zimbraweb/send_mail.py\n  \${nexthop} \${user} \${sasl_username}" >> /etc/postfix-zimbra/master.cf
 RUN echo -e "transport_maps = texthash:/etc/postfix-zimbra/transport\nvirtual_alias_maps = texthash:/etc/postfix-zimbra/virtual_aliases" >> /etc/postfix-zimbra/main.cf
 
 RUN echo -e "submission inet n - n - - smtpd" >> /etc/postfix-zimbra/master.cf; echo -e " -o syslog_name=postfix/submission" >> /etc/postfix-zimbra/master.cf; echo -e " -o smtpd_sasl_auth_enable=yes" >> /etc/postfix-zimbra/master.cf; echo -e " -o smtpd_sasl_path=private/auth" >> /etc/postfix-zimbra/master.cf; echo -e " -o smtpd_client_restrictions=permit_sasl_authenticated,reject" >> /etc/postfix-zimbra/master.cf
