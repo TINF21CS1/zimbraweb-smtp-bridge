@@ -1,0 +1,19 @@
+# This Docker compose is configured with SMTP-Relay. Please consult the Readme if you want this option. Otherwise plase use the plain container and not this compose file.
+
+version: '3'
+services:
+  zimbraweb:
+    image: 'ghcr.io/cirosec-studis/zimbraweb-smtp-bridge:latest'
+    restart: unless-stopped
+    ports:
+    - '587:587'
+    environment:
+    - ENVCONFIG=true
+    - smtp_fallback=enabled
+    - smtp_fallback_relay_host=realyhost
+  
+  relayhost:
+    image: boky/postfix
+    restart: unless-stopped
+    environment:
+    - ALLOWED_SENDER_DOMAINS=student.dhbw-mannheim.de
