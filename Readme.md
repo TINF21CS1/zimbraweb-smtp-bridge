@@ -44,6 +44,31 @@ docker run --name smtp_bridge -h <your_domain_name> -p 587:587 ghcr.io/cirosec-s
 
 If you do not have a domain name associated with the server, you can use whatever hostname you want, e.g. "smtp_bridge.local".
 
+### Configuration
+
+There are two options for configuring. A default configuration will be generated for all values that are not set manually.
+
+The default configuration is as follows:
+
+```json
+{
+    "zimbra_host": "https://studgate.dhbw-mannheim.de",
+    "email_domain": "student.dhbw-mannheim.de",
+    "smtp_fallback": "disabled",
+    "smtp_fallback_relay_host": "172.17.0.2",
+}
+```
+
+#### config.json
+
+Put a `config.json` file into the mounted folder at `/srv/zimbraweb/mnt/`.
+
+#### ENV variables
+
+In docker ENV variables can be set with the `-e` flag.
+
+Set `ENVCONFIG=true` to enable configuration via ENV Variables. Then set all other ENV-variables to the configuration value you want.
+
 ### TLS Support
 
 TLS is enabled by default, using a self-signed certificate for the hostname you provided. This will be enough in most cases, you will just need to accept the self-signed certificate in your email client. Thunderbird and Outlook will tell you that the certificate could not be verified. You will need to add an exception.
