@@ -8,8 +8,12 @@ CONF_PATH = "/srv/zimbraweb/mnt/config.json"
 
 def main():
     if not os.path.isfile(CONF_PATH):
-        print("No config file found, creating.")
-        create_config()
+        if os.environ.get('ENVCONFIG') == "true":
+            print("No config file found, creating from ENV.")
+            create_config_env()
+        else:
+            print("No config file found, creating.")
+            create_config()
     while not validate_config():
         ans = input("Current configuration seems invalid. Recreate (y/n)?")
         while ans not in ["y", "n"]:
@@ -18,7 +22,7 @@ def main():
             create_config()
             return
     return
-    
+
 def validate_config() -> bool:
     with open(CONF_PATH, "r") as f:
         try:
@@ -47,6 +51,8 @@ def create_config():
     config = {
         "zimbra_host": "https://studgate.dhbw-mannheim.de",
         "email_domain": "student.dhbw-mannheim.de",
+        "smtp_fallback": "disabled",
+        "smtp_fallback_relay_host": "172.17.0.2",
     }
 
     if os.isatty(0):
@@ -64,7 +70,25 @@ def create_config():
     if not os.path.isdir("/srv/zimbraweb/mnt/logs"):
         os.mkdir("/srv/zimbraweb/mnt/logs")
         os.chmod("/srv/zimbraweb/mnt/logs", 0o777)
-    
+
+def create_config_env():
+    config = {
+        "zimbra_host": "https://studgate.dhbw-mannheim.de",
+        "email_domain": "student.dhbw-mannheim.de",
+        "smtp_fallback": "disabled",
+        "smtp_fallback_relay_host": "172.17.0.2",
+    }
+
+    for key, default in config.items():
+        config[key] = os.getenv(key, default)
+
+    with open(CONF_PATH, "w") as f:
+        json.dump(config, f, indent=4)
+
+    if not os.path.isdir("/srv/zimbraweb/mnt/logs"):
+        os.mkdir("/srv/zimbraweb/mnt/logs")
+        os.chmod("/srv/zimbraweb/mnt/logs", 0o777)
+
 def get_config() -> Dict[str, str]:
     validate_config()
     with open(CONF_PATH, "r") as f:
