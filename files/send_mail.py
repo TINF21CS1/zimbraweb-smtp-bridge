@@ -11,11 +11,9 @@ from zimbra_config import get_config
 
 CONFIG = get_config()
 
-file_handler = logging.FileHandler(
-    filename='/srv/zimbraweb/logs/send_mail.log')
+#file_handler = logging.FileHandler(filename='/dev/stdout')
 stdout_handler = logging.StreamHandler(sys.stdout)
-handlers = [file_handler, stdout_handler]
-
+handlers = [stdout_handler]
 logging.basicConfig(handlers=handlers, level=logging.INFO)
 
 logging.info("send_mail started!")

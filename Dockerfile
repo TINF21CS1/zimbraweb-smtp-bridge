@@ -11,6 +11,7 @@ RUN pip3 install zimbraweb git+https://github.com/sdgathman/pymilter
 
 #postfix basic config
 RUN postconf -e "mynetworks=0.0.0.0/0" "maillog_file=/dev/stdout" "smtpd_sasl_path=private/auth" "smtpd_sasl_type=dovecot" "smtpd_sasl_auth_enable=yes" "smtpd_delay_reject=yes" "smtpd_client_restrictions=permit_sasl_authenticated,reject" "smtpd_milters=unix:/milter.sock"
+RUN echo -e "postlog   unix-dgram n  -       n       -       1       postlogd" >> /etc/postfix/master.cf
 
 #postfix transport script execution
 RUN echo "*  zimbrawebtransport:" > /etc/postfix/transport
