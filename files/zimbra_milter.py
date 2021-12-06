@@ -110,10 +110,8 @@ class zimbraMilter(Milter.Milter):
         if 'From: "Microsoft Outlook" <' in raw_eml:
             # this is a Microsoft Outlook Test message, we need to allow it.
             return Milter.ACCEPT
-        #TODO use emlparsing.is_parsable() when released in zimbraweb v2.1
-        try:
-            emlparsing.parse_eml(raw_eml)
-        except emlparsing.UnsupportedEMLError:
+        if not emlparsing.is_parsable(raw_eml):
+            # this is an html email or similar
             if CONFIG['smtp_fallback'] == "enabled":
                 logging.info("Zimbra Unparsable EML, but SMTP relay is enabled")
                 return Milter.ACCEPT

@@ -9,25 +9,6 @@ import smtplib
 from zimbraweb import WebkitAttachment, ZimbraUser, emlparsing
 from zimbra_config import get_config
 
-#### TEMP
-#this function should come from zimbraweb.emlparsing in version 2.1, but is temporarily availible directly for testing
-
-def is_parsable(eml: str) -> bool:
-    """Check eml string for parsability
-    Args:
-        eml (str): The EML string to parse.
-    Returns:
-        bool if parse_eml() will throw an error.
-    """
-
-    try:
-        emlparsing.parse_eml(eml)
-        return True
-    except emlparsing.UnsupportedEMLError:
-        return False
-
-####
-
 CONFIG = get_config()
 
 file_handler = logging.FileHandler(
@@ -104,7 +85,7 @@ elif parsed["From"] == f'"Microsoft Outlook" <{ZIMBRA_USERNAME}@{CONFIG["email_d
     exit(0 if result.success else 1)
 
 # html mail via smtp relay, if smtpfallback is enabled
-elif not is_parsable(raw_eml) and CONFIG['smtp_fallback'] == "enabled":
+elif not emlparsing.is_parsable(raw_eml) and CONFIG['smtp_fallback'] == "enabled":
     logging.info("Mail not parsable by Zimbra. Using SMTP relay instead.")
     with smtplib.SMTP(CONFIG['smtp_fallback_relay_host']) as s:
         s.send_message(parsed)

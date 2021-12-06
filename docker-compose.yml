@@ -10,7 +10,7 @@ services:
     environment:
     - ENVCONFIG=true
     - smtp_fallback=enabled
-    - smtp_fallback_relay_host=realyhost
+    - smtp_fallback_relay_host=relayhost
   
   relayhost:
     image: boky/postfix
