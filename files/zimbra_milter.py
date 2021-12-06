@@ -17,7 +17,7 @@ from Milter import milter
 from zimbraweb import emlparsing
 from zimbra_config import get_config
 
-#file_handler = logging.FileHandler(filename='/dev/stdout')
+#file_handler = logging.FileHandler(filename='/var/log/milterpy')
 stdout_handler = logging.StreamHandler(sys.stdout)
 handlers = [stdout_handler]
 logging.basicConfig(handlers=handlers, level=logging.INFO)
