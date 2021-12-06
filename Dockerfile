@@ -9,18 +9,15 @@ RUN python3 -m ensurepip; pip3 install --no-cache --upgrade pip setuptools
 
 RUN pip3 install zimbraweb git+https://github.com/sdgathman/pymilter
 
-#postfix config
-RUN postconf -e mynetworks=0.0.0.0/0; postconf -e "maillog_file=/dev/stdout"; postconf -e smtpd_sasl_path=private/auth; postconf -e smtpd_sasl_type=dovecot; postconf -e smtpd_sasl_auth_enable=yes; postconf -e smtpd_delay_reject=yes; postconf -e smtpd_client_restrictions=permit_sasl_authenticated,reject; postconf -e smtpd_milters=unix:/milter.sock
+#postfix basic config
+RUN postconf -e "mynetworks=0.0.0.0/0" "maillog_file=/dev/stdout" "smtpd_sasl_path=private/auth" "smtpd_sasl_type=dovecot" "smtpd_sasl_auth_enable=yes" "smtpd_delay_reject=yes" "smtpd_client_restrictions=permit_sasl_authenticated,reject" "smtpd_milters=unix:/milter.sock"
 
-#add script execution
-#https://contrid.net/server/mail-servers/postfix-catch-all-pipe-to-script
-RUN touch /etc/postfix/virtual_aliases
+#postfix transport script execution
 RUN echo "*  zimbrawebtransport:" > /etc/postfix/transport
-#zusammen mit -e muss bei echo $ escaped werden
 RUN echo -e "zimbrawebtransport   unix  -       n       n       -       -       pipe\n  flags=FR user=nobody argv=/srv/zimbraweb/send_mail.py\n  \${nexthop} \${user} \${sasl_username}" >> /etc/postfix/master.cf
-RUN echo -e "transport_maps = texthash:/etc/postfix/transport\nvirtual_alias_maps = texthash:/etc/postfix/virtual_aliases" >> /etc/postfix/main.cf
+RUN postconf -e "transport_maps=texthash:/etc/postfix/transport"
 
-RUN echo -e "submission inet n - y - - smtpd" >> /etc/postfix/master.cf; echo -e " -o syslog_name=postfix/submission" >> /etc/postfix/master.cf; echo -e " -o smtpd_sasl_auth_enable=yes" >> /etc/postfix/master.cf; echo -e " -o smtpd_sasl_path=private/auth" >> /etc/postfix/master.cf; echo -e " -o smtpd_client_restrictions=permit_sasl_authenticated,reject" >> /etc/postfix/master.cf
+RUN echo -e "submission inet n - y - - smtpd\n -o syslog_name=postfix/submission\n -o smtpd_sasl_auth_enable=yes\n -o smtpd_sasl_path=private/auth\n -o smtpd_client_restrictions=permit_sasl_authenticated,reject" >> /etc/postfix/master.cf
 
 #dovecot config
 ADD ./files/dovecot/conf.d/ /etc/dovecot/conf.d/
