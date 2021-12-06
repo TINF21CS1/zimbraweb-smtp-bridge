@@ -125,3 +125,17 @@ rpi ~$ sudo apt install libseccomp2 -t buster-backports
 ```
 
 This fix is from https://blog.samcater.com/fix-workaround-rpi4-docker-libseccomp2-docker-20/. Alpine requires libseccomp2>2.4.2 but on debian buster has 2.3.6, this fix installes a newer version from the backports repository.
+
+### SMTP Relay function
+
+Zimbra has certain limitations, like not supporting html Emails. If you want to route these unsupported E-Mails via another SMTP relay, use this function. It is disabled by default.
+
+❗ be careful with this option. It can lead to your Mail being classified as Spam or outright rejected by the receiving Server due to wrong Origin.
+
+If you want to take the easy option use the `docker-compose.yml` provided in this repository.
+
+Set the `smtp_fallback` configuration option to `"enabled"` and `smtp_fallback_relay_host` to a Mailserver that accepts Mail on Port 25.
+
+#### Known Limitations
+
+* Currently authentication to the Relay host is not supported.
