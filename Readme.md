@@ -8,8 +8,6 @@ This Container allows users to send E-Mails via SMTP to a Zimbra Web Interface. 
 
 ## Public Bridge
 
-⚠️ The public bridge is down as of 2021-12-10, will be up again when I verify that my server is not affected by log4j
-
 There is a public server available at dhbw-mannheim.email at port 2525. Connect to it via SMTP with STARTTLS. For increased security we recommend hosting the Bridge yourself if you have a server available, [more on that below](#self-hosting). The public bridge is configured to automatically purge all data every 60 minutes. No logging data is written to disk at all, auth tokens (which are needed to authenticated with the Web Client) are kept only in memory and for 60 minutes at most, but in almost all cases will be deleted immediately after successful email delivery.
 
 You can use the following settings:
