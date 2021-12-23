@@ -11,11 +11,11 @@ from zimbra_config import get_config
 
 #setting up logger
 import hostnamefilter
-#handler = logging.FileHandler(filename='/var/log/log')
-handler = logging.StreamHandler(sys.stdout)
-handler.addFilter(hostnamefilter.HostnameFilter())
-handler.setFormatter(logging.Formatter('%(asctime)s %(hostname)s python/%(filename)s: %(message)s', datefmt='%b %d %H:%M:%S'))
-handlers = [handler]
+file_handler = logging.FileHandler(filename='/var/log/log')
+#stream_handler = logging.StreamHandler()
+file_handler.addFilter(hostnamefilter.HostnameFilter())
+file_handler.setFormatter(logging.Formatter('%(asctime)s %(hostname)s python/%(filename)s: %(message)s', datefmt='%b %d %H:%M:%S'))
+handlers = [file_handler]
 logging.basicConfig(handlers=handlers, level=logging.INFO)
 
 logging.info("send_mail started!")

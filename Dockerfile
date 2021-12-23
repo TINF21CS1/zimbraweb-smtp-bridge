@@ -14,8 +14,11 @@ RUN postconf -e "mynetworks=0.0.0.0/0" "maillog_file=/var/log/log" "smtpd_sasl_p
 #RUN echo -e "postlog   unix-dgram n  -       n       -       1       postlogd" >> /etc/postfix/master.cf
 
 #postfix transport script execution
+RUN adduser --disabled-password posttransport
+RUN touch /var/log/log
+RUN chmod -R 777 /var/log/log
 RUN echo "*  zimbrawebtransport:" > /etc/postfix/transport
-RUN echo -e "zimbrawebtransport   unix  -       n       n       -       -       pipe\n  flags=FR user=nobody argv=/srv/zimbraweb/send_mail.py\n  \${nexthop} \${user} \${sasl_username}" >> /etc/postfix/master.cf
+RUN echo -e "zimbrawebtransport   unix  -       n       n       -       -       pipe\n  flags=FR user=posttransport argv=/srv/zimbraweb/send_mail.py\n  \${nexthop} \${user} \${sasl_username}" >> /etc/postfix/master.cf
 RUN postconf -e "transport_maps=texthash:/etc/postfix/transport"
 
 RUN echo -e "submission inet n - y - - smtpd\n -o syslog_name=postfix/submission\n -o smtpd_sasl_auth_enable=yes\n -o smtpd_sasl_path=private/auth\n -o smtpd_client_restrictions=permit_sasl_authenticated,reject" >> /etc/postfix/master.cf
