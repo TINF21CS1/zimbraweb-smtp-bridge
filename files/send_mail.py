@@ -5,15 +5,24 @@ import pickle
 import logging
 from email.parser import Parser
 import smtplib
+import platform
 
 from zimbraweb import WebkitAttachment, ZimbraUser, emlparsing
 from zimbra_config import get_config
 
 CONFIG = get_config()
 
-#file_handler = logging.FileHandler(filename='/dev/stdout')
-stdout_handler = logging.StreamHandler(sys.stdout)
-handlers = [stdout_handler]
+#setting up logger
+class HostnameFilter(logging.Filter):
+    hostname = platform.node()
+    def filter(self, record):
+        record.hostname = HostnameFilter.hostname
+        return True
+handler = logging.FileHandler(filename='/var/log/python.log')
+#handler = logging.StreamHandler(sys.stdout)
+handler.addFilter(HostnameFilter())
+handler.setFormatter(logging.Formatter('%(asctime)s %(hostname)s python/%(filename)s: %(message)s', datefmt='%b %d %H:%M:%S'))
+handlers = [handler]
 logging.basicConfig(handlers=handlers, level=logging.INFO)
 
 logging.info("send_mail started!")

@@ -5,10 +5,19 @@ from typing import Dict
 import re
 import sys
 import logging
+import platform
 
-#file_handler = logging.FileHandler(filename='/dev/stdout')
-stdout_handler = logging.StreamHandler(sys.stdout)
-handlers = [stdout_handler]
+#setting up logger
+class HostnameFilter(logging.Filter):
+    hostname = platform.node()
+    def filter(self, record):
+        record.hostname = HostnameFilter.hostname
+        return True
+handler = logging.FileHandler(filename='/var/log/python.log')
+#handler = logging.StreamHandler(sys.stdout)
+handler.addFilter(HostnameFilter())
+handler.setFormatter(logging.Formatter('%(asctime)s %(hostname)s python/%(filename)s: %(message)s', datefmt='%b %d %H:%M:%S'))
+handlers = [handler]
 logging.basicConfig(handlers=handlers, level=logging.INFO)
 
 CONF_PATH = "/srv/zimbraweb/mnt/config.json"

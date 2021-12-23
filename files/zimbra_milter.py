@@ -10,6 +10,7 @@ from io import BytesIO
 import tempfile
 from time import strftime
 import logging
+import platform
 
 import Milter
 from Milter import milter
@@ -17,9 +18,17 @@ from Milter import milter
 from zimbraweb import emlparsing
 from zimbra_config import get_config
 
-#file_handler = logging.FileHandler(filename='/var/log/milterpy')
-stdout_handler = logging.StreamHandler(sys.stdout)
-handlers = [stdout_handler]
+#setting up logger
+class HostnameFilter(logging.Filter):
+    hostname = platform.node()
+    def filter(self, record):
+        record.hostname = HostnameFilter.hostname
+        return True
+handler = logging.FileHandler(filename='/var/log/python.log')
+#handler = logging.StreamHandler(sys.stdout)
+handler.addFilter(HostnameFilter())
+handler.setFormatter(logging.Formatter('%(asctime)s %(hostname)s python/%(filename)s: %(message)s', datefmt='%b %d %H:%M:%S'))
+handlers = [handler]
 logging.basicConfig(handlers=handlers, level=logging.INFO)
 
 CONFIG = get_config()
