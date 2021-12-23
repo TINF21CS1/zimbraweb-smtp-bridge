@@ -3,19 +3,14 @@ from json.decoder import JSONDecodeError
 import os
 from typing import Dict
 import re
-import sys
 import logging
-import platform
+import sys
 
 #setting up logger
-class HostnameFilter(logging.Filter):
-    hostname = platform.node()
-    def filter(self, record):
-        record.hostname = HostnameFilter.hostname
-        return True
-handler = logging.FileHandler(filename='/var/log/log')
-#handler = logging.StreamHandler(sys.stdout)
-handler.addFilter(HostnameFilter())
+import hostnamefilter
+#handler = logging.FileHandler(filename='/var/log/log')
+handler = logging.StreamHandler(sys.stdout)
+handler.addFilter(hostnamefilter.HostnameFilter())
 handler.setFormatter(logging.Formatter('%(asctime)s %(hostname)s python/%(filename)s: %(message)s', datefmt='%b %d %H:%M:%S'))
 handlers = [handler]
 logging.basicConfig(handlers=handlers, level=logging.INFO)

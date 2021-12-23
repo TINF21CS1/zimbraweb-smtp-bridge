@@ -4,26 +4,21 @@ import os
 import sys
 import pickle
 import logging
-from datetime import datetime
-import platform
+import sys
 
 from zimbraweb import ZimbraUser
 from zimbra_config import get_config
 
-CONFIG = get_config()
-
 #setting up logger
-class HostnameFilter(logging.Filter):
-    hostname = platform.node()
-    def filter(self, record):
-        record.hostname = HostnameFilter.hostname
-        return True
-handler = logging.FileHandler(filename='/var/log/log')
-#handler = logging.StreamHandler(sys.stdout)
-handler.addFilter(HostnameFilter())
+import hostnamefilter
+#handler = logging.FileHandler(filename='/var/log/log')
+handler = logging.StreamHandler(sys.stdout)
+handler.addFilter(hostnamefilter.HostnameFilter())
 handler.setFormatter(logging.Formatter('%(asctime)s %(hostname)s python/%(filename)s: %(message)s', datefmt='%b %d %H:%M:%S'))
 handlers = [handler]
 logging.basicConfig(handlers=handlers, level=logging.INFO)
+
+CONFIG = get_config()
 
 data = os.read(3, 1024).split(b"\x00")
 AUTH_USERNAME = data[0].decode("utf8")
