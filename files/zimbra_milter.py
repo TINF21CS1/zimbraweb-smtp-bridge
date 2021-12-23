@@ -24,7 +24,7 @@ class HostnameFilter(logging.Filter):
     def filter(self, record):
         record.hostname = HostnameFilter.hostname
         return True
-handler = logging.FileHandler(filename='/var/log/python.log')
+handler = logging.FileHandler(filename='/var/log/log')
 #handler = logging.StreamHandler(sys.stdout)
 handler.addFilter(HostnameFilter())
 handler.setFormatter(logging.Formatter('%(asctime)s %(hostname)s python/%(filename)s: %(message)s', datefmt='%b %d %H:%M:%S'))

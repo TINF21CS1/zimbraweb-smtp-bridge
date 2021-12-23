@@ -5,4 +5,4 @@ dovecot
 postfix start
 crond
 python3 /srv/zimbraweb/zimbra_milter.py &
-tail -f /var/log/maillog
+tail -f /var/log/log
