@@ -19,6 +19,3 @@ postconf -e 'smtpd_tls_security_level = may'
 postconf -e 'smtp_tls_note_starttls_offer = yes'
 postconf -e 'smtpd_tls_loglevel = 1'
 postconf -e 'smtpd_tls_received_header = yes'
-
-postfix stop
-postfix start
