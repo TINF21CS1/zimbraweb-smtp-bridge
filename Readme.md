@@ -39,7 +39,7 @@ In Thunderbird you should go to Acccount Settings, select "Composition & Address
 To start the container use the following command
 
 ```
-docker run --name smtp_bridge -h <your_domain_name> -p 587:587 ghcr.io/cirosec-studis/zimbraweb-smtp-bridge:nightly
+docker run --name smtp_bridge -p 587:587 ghcr.io/cirosec-studis/zimbraweb-smtp-bridge:nightly
 ```
 
 If you do not have a domain name associated with the server, you can use whatever hostname you want, e.g. "smtp_bridge.local".
@@ -100,8 +100,6 @@ The following tags are available:
 * `ghcr.io/cirosec-studis/zimbraweb-smtp-bridge:vX.Y.Z` - Version X.Y.Z (e.g. v1.0.0)
 * `ghcr.io/cirosec-studis/zimbraweb-smtp-bridge:develop` - development build
 
-
-
 If you're on a raspberry pi, note the section [Docker on Raspberry Pi](#docker-on-raspberry-pi).
 
 Optionally mount a logs directory by adding `-v /path/to/logs:/srv/zimbraweb/logs/`.
@@ -136,6 +134,7 @@ If you want to take the easy option use the `docker-compose.yml` provided in thi
 
 Set the `smtp_fallback` configuration option to `"enabled"` and `smtp_fallback_relay_host` to a Mailserver that accepts Mail on Port 25.
 
-#### Known Limitations
+### Known Limitations
 
 * Currently authentication to the Relay host is not supported.
+* Naming the Container after the Mail-Domain of the Zimbra Server or any other Domain, that may be the recipient of actual Mail is not supported and will lead to errors in delivering mail. (See #34)
