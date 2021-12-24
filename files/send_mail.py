@@ -16,6 +16,8 @@ file_handler = logging.FileHandler(filename='/var/log/log')
 file_handler.addFilter(hostnamefilter.HostnameFilter())
 file_handler.setFormatter(logging.Formatter('%(asctime)s %(hostname)s python/%(filename)s: %(message)s', datefmt='%b %d %H:%M:%S'))
 handlers = [file_handler]
+for handler in logging.root.handlers[:]:
+    logging.root.removeHandler(handler)
 logging.basicConfig(handlers=handlers, level=logging.INFO)
 
 logging.info("send_mail started!")

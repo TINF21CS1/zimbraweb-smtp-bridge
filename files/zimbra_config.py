@@ -13,6 +13,8 @@ handler = logging.StreamHandler(sys.stdout)
 handler.addFilter(hostnamefilter.HostnameFilter())
 handler.setFormatter(logging.Formatter('%(asctime)s %(hostname)s python/%(filename)s: %(message)s', datefmt='%b %d %H:%M:%S'))
 handlers = [handler]
+for handler in logging.root.handlers[:]:
+    logging.root.removeHandler(handler)
 logging.basicConfig(handlers=handlers, level=logging.INFO)
 
 CONF_PATH = "/srv/zimbraweb/mnt/config.json"
