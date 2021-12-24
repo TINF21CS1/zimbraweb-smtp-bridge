@@ -5,12 +5,15 @@ keyfile=/tls/key.pem
 
 if [ ! -f "$certfile" ]; then
     # generate a self signed certificate (valid for 10 years)
-    openssl req -x509 -newkey rsa:4096 -keyout $keyfile -out $certfile -sha256 -days 3650 -nodes -subj "/CN=$HOSTNAME"
+    echo "$(date +"%b %d %H:%M:%S") $HOSTNAME start.sh/tls.sh[$$]: No certfile found, generating new self-signed cert..."
+    openssl req -x509 -newkey rsa:4096 -keyout $keyfile -out $certfile -sha256 -days 3650 -nodes -subj "/CN=$HOSTNAME" &>/dev/null
+    echo "$(date +"%b %d %H:%M:%S") $HOSTNAME start.sh/tls.sh[$$]: Writing new private key to '$certfile'"
 fi
 
 chmod 600 $certfile
 chmod 600 $keyfile
 
+echo "$(date +"%b %d %H:%M:%S") $HOSTNAME start.sh/tls.sh[$$]: Writing Postfix conf for TLS"
 postconf -e myhostname=$HOSTNAME
 postconf -e "smtpd_tls_cert_file = ${certfile}"
 postconf -e "smtpd_tls_key_file = ${keyfile}"
