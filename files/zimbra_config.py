@@ -52,22 +52,22 @@ def validate_config() -> bool:
         try:
             config = json.load(f)
         except JSONDecodeError:
-            logging.info("Corrupt config file. (Invalid JSON)")
+            logging.warning("Corrupt config file. (Invalid JSON)")
             return False
     if not "zimbra_host" in config:
-        logging.info("Missing zimbra_host parameter")
+        logging.warning("Missing zimbra_host parameter")
         return False
     host = re.match(r"https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)", config["zimbra_host"])
     if not host:
-        logging.info("Malformed zimbra_host. You need to include the protocol (http(s)://)!")
+        logging.warning("Malformed zimbra_host. You need to include the protocol (http(s)://)!")
 
     if not "email_domain" in config:
-        logging.info("Missing email_domain parameter")
+        logging.warning("Missing email_domain parameter")
         return False
     
     email_domain = re.match(r"(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]", config["email_domain"])
     if not email_domain:
-        logging.info("Malformed email_domain. Only include the part after the @ sign.")
+        logging.warning("Malformed email_domain. Only include the part after the @ sign.")
         return False
     return True
 
@@ -93,7 +93,7 @@ def create_config_env():
 
 def get_config() -> Dict[str, str]:
     if not validate_config():
-        logging.info("Invalid configuration! Falling back to default values.")
+        logging.warning("Invalid configuration! Falling back to default values.")
         return DEFAULT_CONIFG
     with open(CONF_PATH, "r") as f:
             config = json.load(f)
