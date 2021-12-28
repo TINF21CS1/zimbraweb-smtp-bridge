@@ -47,6 +47,7 @@ def main():
         if ans == "n":
             return
         else:
+            logging.info("Invalid or outdated config, overwriting with default.")
             create_config()
     return
 
@@ -64,9 +65,10 @@ def validate_config() -> bool:
     if not host:
         logging.warning("Malformed zimbra_host. You need to include the protocol (http(s)://)!")
 
-    if not "email_domain" in config:
-        logging.warning("Missing email_domain parameter")
-        return False
+    for default_key, default_value in DEFAULT_CONIFG.items():
+        if not default_key in config:
+            logging.warning(f"Missing parameter: {default_key}")
+            return False
     
     email_domain = re.match(r"(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]", config["email_domain"])
     if not email_domain:
