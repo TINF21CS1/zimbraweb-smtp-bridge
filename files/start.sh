@@ -1,5 +1,4 @@
 #!/bin/sh
-sleep 5
 python3 /srv/zimbraweb/zimbra_config.py
 /tls.sh
 dovecot
