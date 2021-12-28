@@ -27,6 +27,7 @@ DEFAULT_CONIFG = {
     }
 
 def main():
+    logging.info("Starting zimbra_config main")
     if not os.path.isfile(CONF_PATH):
         if os.environ.get('ENVCONFIG') == "true":
             logging.info("No config file found, creating from ENV.")
