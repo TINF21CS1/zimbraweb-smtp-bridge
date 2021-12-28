@@ -87,6 +87,7 @@ def create_config():
 def create_config_env():
     for key, default in DEFAULT_CONIFG.items():
         DEFAULT_CONIFG[key] = os.getenv(key, default)
+        logging.info(f"Wrote key {key} with value {DEFAULT_CONIFG[key]}")
 
     with open(CONF_PATH, "w") as f:
         json.dump(DEFAULT_CONIFG, f, indent=4)
