@@ -17,11 +17,15 @@ from Milter import milter
 from zimbraweb import emlparsing
 from zimbra_config import get_config
 
-# syslog.openlog('milter')
-#
-file_handler = logging.FileHandler(filename='/srv/zimbraweb/logs/milter.log')
-stdout_handler = logging.StreamHandler(sys.stdout)
-handlers = [file_handler, stdout_handler]
+#setting up logger
+import hostnamefilter
+handler = logging.FileHandler(filename='/var/log/log')
+#handler = logging.StreamHandler(sys.stdout)
+handler.addFilter(hostnamefilter.HostnameFilter())
+handler.setFormatter(logging.Formatter('%(asctime)s %(hostname)s python/%(filename)s: %(message)s', datefmt='%b %d %H:%M:%S'))
+handlers = [handler]
+for handler in logging.root.handlers[:]:
+    logging.root.removeHandler(handler)
 logging.basicConfig(handlers=handlers, level=logging.INFO)
 
 CONFIG = get_config()
@@ -106,7 +110,6 @@ class zimbraMilter(Milter.Milter):
         self.fp.seek(0)
 
         raw_eml = self.fp.read().decode("utf8")
-        print(raw_eml)
         if 'From: "Microsoft Outlook" <' in raw_eml:
             # this is a Microsoft Outlook Test message, we need to allow it.
             return Milter.ACCEPT
@@ -124,7 +127,6 @@ class zimbraMilter(Milter.Milter):
         return Milter.ACCEPT
 
     def close(self):
-        sys.stdout.flush()		# make log messages visible
         if self.tempname:
             os.remove(self.tempname)  # remove in case session aborted
         if self.fp:
@@ -189,7 +191,7 @@ def runmilter(name, socketname, timeout=0, rmsock=True):
     milter.opensocket(rmsock)
     start_seq = Milter._seq
 
-    print("Changing chmod of socket to 777")
+    logging.debug("Changing chmod of socket to 777")
     os.chmod(socketname, 0o777)
 
     try:
@@ -207,7 +209,6 @@ if __name__ == "__main__":
     socketname = "/var/spool/postfix/milter.sock"
     Milter.factory = zimbraMilter
     Milter.set_flags(Milter.CHGBODY + Milter.CHGHDRS + Milter.ADDHDRS)
-    sys.stdout.flush()
-    print("Starting the Zimbra Milter")
+    logging.info("Starting the Zimbra Milter")
     runmilter("pythonfilter", socketname, 240)
-    print("Shutting down..")
+    logging.info("Shutting down..")
