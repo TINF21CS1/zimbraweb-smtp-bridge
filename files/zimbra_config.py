@@ -27,6 +27,7 @@ DEFAULT_CONIFG = {
     }
 
 def main():
+    logging.info("Starting zimbra_config")
     if not os.path.isfile(CONF_PATH):
         if os.environ.get('ENVCONFIG') == "true":
             logging.info("No config file found, creating from ENV.")
@@ -34,6 +35,8 @@ def main():
         else:
             logging.info("No config file found, creating.")
             create_config()
+    else:
+        logging.info("Using existing config file.")
     while not validate_config():
         if os.isatty(0):
             ans = input("Current configuration seems invalid. Recreate (y/n)?")
@@ -87,6 +90,7 @@ def create_config():
 def create_config_env():
     for key, default in DEFAULT_CONIFG.items():
         DEFAULT_CONIFG[key] = os.getenv(key, default)
+        logging.info(f"Wrote key {key} with value {DEFAULT_CONIFG[key]}")
 
     with open(CONF_PATH, "w") as f:
         json.dump(DEFAULT_CONIFG, f, indent=4)
