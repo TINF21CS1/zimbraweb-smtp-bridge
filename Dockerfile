@@ -29,8 +29,8 @@ ADD ./files/dovecot/conf.d/ /etc/dovecot/conf.d/
 ADD ./files/*.py /srv/zimbraweb/
 RUN chmod 777 /srv/zimbraweb/*.py
 
-RUN mkdir /srv/zimbraweb/mnt/ /srv/zimbraweb/logs/; chmod -R 777 /srv/zimbraweb/mnt/; chmod -R 777 /srv/zimbraweb/logs/
-
+#config mount
+RUN mkdir /srv/zimbraweb/mnt/; chmod -R 777 /srv/zimbraweb/mnt/
 VOLUME /srv/zimbraweb/mnt/
 
 # Expose smtp submission port

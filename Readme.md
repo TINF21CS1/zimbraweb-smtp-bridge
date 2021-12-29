@@ -108,8 +108,6 @@ The following tags are available:
 
 If you're on a raspberry pi, note the section [Docker on Raspberry Pi](#docker-on-raspberry-pi).
 
-Optionally mount a logs directory by adding `-v /path/to/logs:/srv/zimbraweb/logs/`.
-
 You can now connect to the container with your SMTP client at localhost:587.
 To authenticate, use your Zimbra Webclient login credentials (without the @domain.tld part!).
 
