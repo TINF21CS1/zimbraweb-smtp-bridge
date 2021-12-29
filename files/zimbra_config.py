@@ -15,7 +15,8 @@ handler.setFormatter(logging.Formatter('%(asctime)s %(hostname)s python/%(filena
 handlers = [handler]
 for handler in logging.root.handlers[:]:
     logging.root.removeHandler(handler)
-logging.basicConfig(handlers=handlers, level=logging.INFO)
+if (os.environ.get('log_level') == "debug"): logging.basicConfig(handlers=handlers, level=logging.DEBUG)
+else: logging.basicConfig(handlers=handlers, level=logging.INFO)
 
 CONF_PATH = "/srv/zimbraweb/mnt/config.json"
 
@@ -24,6 +25,7 @@ DEFAULT_CONIFG = {
         "email_domain": "student.dhbw-mannheim.de",
         "smtp_fallback": "disabled",
         "smtp_fallback_relay_host": "172.17.0.2",
+        "log_level": "info",
     }
 
 def main():

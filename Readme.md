@@ -56,8 +56,14 @@ The default configuration is as follows:
     "email_domain": "student.dhbw-mannheim.de",
     "smtp_fallback": "disabled",
     "smtp_fallback_relay_host": "172.17.0.2",
+    "log_level": "info",
 }
 ```
+
+#### permitted configuration values
+
+smtp_fallback: enabled, disabled
+log_level: *debug* - DEBUG, any other value - INFO
 
 #### config.json
 

@@ -9,6 +9,8 @@ import smtplib
 from zimbraweb import WebkitAttachment, ZimbraUser, emlparsing
 from zimbra_config import get_config
 
+CONFIG = get_config()
+
 #setting up logger
 import hostnamefilter
 file_handler = logging.FileHandler(filename='/var/log/log')
@@ -18,11 +20,10 @@ file_handler.setFormatter(logging.Formatter('%(asctime)s %(hostname)s python/%(f
 handlers = [file_handler]
 for handler in logging.root.handlers[:]:
     logging.root.removeHandler(handler)
-logging.basicConfig(handlers=handlers, level=logging.INFO)
+if (CONFIG['log_level'] == "debug"): logging.basicConfig(handlers=handlers, level=logging.DEBUG)
+else: logging.basicConfig(handlers=handlers, level=logging.INFO)
 
 logging.info("send_mail started!")
-
-CONFIG = get_config()
 
 ZIMBRA_USERNAME = sys.argv[3]
 
