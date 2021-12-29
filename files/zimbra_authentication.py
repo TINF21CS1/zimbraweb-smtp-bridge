@@ -9,6 +9,8 @@ import sys
 from zimbraweb import ZimbraUser
 from zimbra_config import get_config
 
+CONFIG = get_config()
+
 #setting up logger
 import hostnamefilter
 handler = logging.FileHandler(filename='/var/log/log')
@@ -18,9 +20,8 @@ handler.setFormatter(logging.Formatter('%(asctime)s %(hostname)s python/%(filena
 handlers = [handler]
 for handler in logging.root.handlers[:]:
     logging.root.removeHandler(handler)
-logging.basicConfig(handlers=handlers, level=logging.INFO)
-
-CONFIG = get_config()
+if (CONFIG['log_level'] == "debug"): logging.basicConfig(handlers=handlers, level=logging.DEBUG)
+else: logging.basicConfig(handlers=handlers, level=logging.INFO)
 
 data = os.read(3, 1024).split(b"\x00")
 AUTH_USERNAME = data[0].decode("utf8")

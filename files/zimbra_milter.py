@@ -17,6 +17,8 @@ from Milter import milter
 from zimbraweb import emlparsing
 from zimbra_config import get_config
 
+CONFIG = get_config()
+
 #setting up logger
 import hostnamefilter
 handler = logging.FileHandler(filename='/var/log/log')
@@ -26,9 +28,8 @@ handler.setFormatter(logging.Formatter('%(asctime)s %(hostname)s python/%(filena
 handlers = [handler]
 for handler in logging.root.handlers[:]:
     logging.root.removeHandler(handler)
-logging.basicConfig(handlers=handlers, level=logging.INFO)
-
-CONFIG = get_config()
+if (CONFIG['log_level'] == "debug"): logging.basicConfig(handlers=handlers, level=logging.DEBUG)
+else: logging.basicConfig(handlers=handlers, level=logging.INFO)
 
 class zimbraMilter(Milter.Milter):
     # https://github.com/sdgathman/pymilter/blob/master/sample.py
@@ -53,11 +54,12 @@ class zimbraMilter(Milter.Milter):
         self.bodysize = 0
         self.user = self.getsymval('{auth_authen}')
         self.auth_type = self.getsymval('{auth_type}')
-        if "@" in self.user:
-            logging.warning(f"user {self.user} didn't rtfm.")
-            self.setreply("530", "5.7.0", "Your username contains the domain, remove it.")
         if self.user:
-            logging.info(f"user {self.user} sent mail from {f}")
+            if "@" in self.user:
+                logging.warning(f"user {self.user} didn't rtfm.")
+                self.setreply("530", "5.7.0", "Your username contains the domain, remove it.")
+            else:
+                logging.info(f"user {self.user} sent mail from {f}")
         else:
             logging.warning(f"unauthenticated mail from {f}")
             self.setreply("530", "5.7.0", "Authentication required")
@@ -131,8 +133,6 @@ class zimbraMilter(Milter.Milter):
             os.remove(self.tempname)  # remove in case session aborted
         if self.fp:
             self.fp.close()
-        if os.path.isfile(f"/dev/shm/auth_{self.user}"):
-            os.chmod(f"/dev/shm/auth_{self.user}", 0o444)
         return Milter.CONTINUE
 
     def abort(self):
