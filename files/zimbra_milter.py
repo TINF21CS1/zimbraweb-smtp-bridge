@@ -55,7 +55,11 @@ class zimbraMilter(Milter.Milter):
         self.user = self.getsymval('{auth_authen}')
         self.auth_type = self.getsymval('{auth_type}')
         if self.user:
-            logging.info(f"user {self.user} sent mail from {f}")
+            if "@" in self.user:
+                logging.warning(f"user {self.user} didn't rtfm.")
+                self.setreply("530", "5.7.0", "Your username contains the domain, remove it.")
+            else:
+                logging.info(f"user {self.user} sent mail from {f}")
         else:
             logging.warning(f"unauthenticated mail from {f}")
             self.setreply("530", "5.7.0", "Authentication required")
