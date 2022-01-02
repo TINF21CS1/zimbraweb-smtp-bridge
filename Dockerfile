@@ -33,6 +33,12 @@ RUN chmod 777 /srv/zimbraweb/*.py
 RUN mkdir /srv/zimbraweb/mnt/; chmod -R 777 /srv/zimbraweb/mnt/
 VOLUME /srv/zimbraweb/mnt/
 
+# Add crontab to delete expired auth tokens
+RUN crontab -l /cron
+RUN echo "* * * * * find /dev/shm/ -name auth_* -type f -perm 444 -mmin +3 -delete" >> /cron
+RUN crontab /cron
+RUN rm /cron
+
 # Expose smtp submission port
 EXPOSE 587
 

@@ -4,6 +4,7 @@ python3 /srv/zimbraweb/zimbra_config.py
 dovecot
 echo "$(date +"%b %d %H:%M:%S") $HOSTNAME start.sh[$$]: Started dovecot."
 postfix start
+crond
 python3 /srv/zimbraweb/zimbra_milter.py &
 sleep 2
 echo "$(date +"%b %d %H:%M:%S") $HOSTNAME start.sh[$$]: ➔ Switching to log output from '/var/log/log'"
