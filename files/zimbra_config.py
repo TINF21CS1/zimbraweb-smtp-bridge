@@ -3,70 +3,106 @@ from json.decoder import JSONDecodeError
 import os
 from typing import Dict
 import re
+import logging
+import sys
+
+#setting up logger
+import hostnamefilter
+#handler = logging.FileHandler(filename='/var/log/log')
+handler = logging.StreamHandler(sys.stdout)
+handler.addFilter(hostnamefilter.HostnameFilter())
+handler.setFormatter(logging.Formatter('%(asctime)s %(hostname)s python/%(filename)s: %(message)s', datefmt='%b %d %H:%M:%S'))
+handlers = [handler]
+for handler in logging.root.handlers[:]:
+    logging.root.removeHandler(handler)
+if (os.environ.get('log_level') == "debug"): logging.basicConfig(handlers=handlers, level=logging.DEBUG)
+else: logging.basicConfig(handlers=handlers, level=logging.INFO)
 
 CONF_PATH = "/srv/zimbraweb/mnt/config.json"
 
+DEFAULT_CONIFG = {
+        "zimbra_host": "https://studgate.dhbw-mannheim.de",
+        "email_domain": "student.dhbw-mannheim.de",
+        "smtp_fallback": "disabled",
+        "smtp_fallback_relay_host": "172.17.0.2",
+        "log_level": "info",
+    }
+
 def main():
+    logging.info("Starting zimbra_config")
     if not os.path.isfile(CONF_PATH):
-        print("No config file found, creating.")
-        create_config()
+        if os.environ.get('ENVCONFIG') == "true":
+            logging.info("No config file found, creating from ENV.")
+            create_config_env()
+        else:
+            logging.info("No config file found, creating.")
+            create_config()
+    else:
+        logging.info("Using existing config file.")
     while not validate_config():
-        ans = input("Current configuration seems invalid. Recreate (y/n)?")
+        if os.isatty(0):
+            ans = input("Current configuration seems invalid. Recreate (y/n)?")
+        else:
+            ans = "y"
         while ans not in ["y", "n"]:
             ans = input("Current configuration seems invalid. Recreate (y/n)?")
-        if ans == "y":
-            create_config()
+        if ans == "n":
             return
+        else:
+            logging.info("Invalid or outdated config, overwriting with default.")
+            create_config()
     return
-    
+
 def validate_config() -> bool:
     with open(CONF_PATH, "r") as f:
         try:
             config = json.load(f)
         except JSONDecodeError:
-            print("Corrupt config file. (Invalid JSON)")
+            logging.warning("Corrupt config file. (Invalid JSON)")
             return False
     if not "zimbra_host" in config:
-        print("Missing zimbra_host parameter")
+        logging.warning("Missing zimbra_host parameter")
         return False
     host = re.match(r"https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)", config["zimbra_host"])
     if not host:
-        print("Malformed zimbra_host. You need to include the protocol (http(s)://)!")
+        logging.warning("Malformed zimbra_host. You need to include the protocol (http(s)://)!")
 
-    if not "email_domain" in config:
-        print("Missing email_domain parameter")
-        return False
+    for default_key, default_value in DEFAULT_CONIFG.items():
+        if not default_key in config:
+            logging.warning(f"Missing parameter: {default_key}")
+            return False
     
     email_domain = re.match(r"(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]", config["email_domain"])
     if not email_domain:
-        print("Malformed email_domain. Only include the part after the @ sign.")
+        logging.warning("Malformed email_domain. Only include the part after the @ sign.")
         return False
     return True
 
 def create_config():
-    config = {
-        "zimbra_host": "https://studgate.dhbw-mannheim.de",
-        "email_domain": "student.dhbw-mannheim.de",
-    }
-
     if os.isatty(0):
-        for key, default in config.items():
+        for key, default in DEFAULT_CONIFG.items():
             if default is not None:
-                config[key] = input(f"{key} (default: {default}): ") or default
+                DEFAULT_CONIFG[key] = input(f"{key} (default: {default}): ") or default
             else:
-                config[key] = input(f"{key} (default: {default}): ")
+                DEFAULT_CONIFG[key] = input(f"{key} (default: {default}): ")
     else:
-        print("not running interactively, assuming default values.")
+        logging.info("Not running interactively, assuming default values.")
 
     with open(CONF_PATH, "w") as f:
-        json.dump(config, f, indent=4)
+        json.dump(DEFAULT_CONIFG, f, indent=4)
 
-    if not os.path.isdir("/srv/zimbraweb/mnt/logs"):
-        os.mkdir("/srv/zimbraweb/mnt/logs")
-        os.chmod("/srv/zimbraweb/mnt/logs", 0o777)
-    
+def create_config_env():
+    for key, default in DEFAULT_CONIFG.items():
+        DEFAULT_CONIFG[key] = os.getenv(key, default)
+        logging.info(f"Wrote key {key} with value {DEFAULT_CONIFG[key]}")
+
+    with open(CONF_PATH, "w") as f:
+        json.dump(DEFAULT_CONIFG, f, indent=4)
+
 def get_config() -> Dict[str, str]:
-    validate_config()
+    if not validate_config():
+        logging.warning("Invalid configuration! Falling back to default values.")
+        return DEFAULT_CONIFG
     with open(CONF_PATH, "r") as f:
             config = json.load(f)
     return config

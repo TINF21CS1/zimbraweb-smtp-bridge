@@ -8,7 +8,7 @@ This Container allows users to send E-Mails via SMTP to a Zimbra Web Interface. 
 
 ## Public Bridge
 
-There is a public server available at dhbw-mannheim.email at port 2525. Connect to it via SMTP with STARTTLS. For increased security we recommend hosting the Bridge yourself if you have a server available, [more on that below](#self-hosting). The public bridge is configured to automatically purge all data every 60 minutes. No logging data is written to disk at all, auth tokens (which are needed to authenticated with the Web Client) are kept only in memory and for 60 minutes at most, but in almost all cases will be deleted immediately after successful email delivery.
+There is a public server available at dhbw-mannheim.email at port 2525. Connect to it via SMTP with STARTTLS. For increased security we recommend hosting the Bridge yourself if you have a server available, [more on that below](#self-hosting). No logging data is written to disk at all, auth tokens (which are needed to authenticated with the Web Client) are kept only in memory and for 3 minutes at most, but in almost all cases will be deleted immediately after successful email delivery.
 
 You can use the following settings:
 
@@ -39,10 +39,41 @@ In Thunderbird you should go to Acccount Settings, select "Composition & Address
 To start the container use the following command
 
 ```
-docker run --name smtp_bridge -h <your_domain_name> -p 587:587 ghcr.io/cirosec-studis/zimbraweb-smtp-bridge:nightly
+docker run --name smtp_bridge -p 587:587 ghcr.io/cirosec-studis/zimbraweb-smtp-bridge:nightly
 ```
 
 If you do not have a domain name associated with the server, you can use whatever hostname you want, e.g. "smtp_bridge.local".
+
+### Configuration
+
+There are two options for configuring. A default configuration will be generated for all values that are not set manually.
+
+The default configuration is as follows:
+
+```json
+{
+    "zimbra_host": "https://studgate.dhbw-mannheim.de",
+    "email_domain": "student.dhbw-mannheim.de",
+    "smtp_fallback": "disabled",
+    "smtp_fallback_relay_host": "172.17.0.2",
+    "log_level": "info",
+}
+```
+
+#### permitted configuration values
+
+smtp_fallback: enabled, disabled
+log_level: *debug* - DEBUG, any other value - INFO
+
+#### config.json
+
+Put a `config.json` file into the mounted folder at `/srv/zimbraweb/mnt/`.
+
+#### ENV variables
+
+In docker ENV variables can be set with the `-e` flag.
+
+Set `ENVCONFIG=true` to enable configuration via ENV Variables. Then set all other ENV-variables to the configuration value you want.
 
 ### TLS Support
 
@@ -75,11 +106,7 @@ The following tags are available:
 * `ghcr.io/cirosec-studis/zimbraweb-smtp-bridge:vX.Y.Z` - Version X.Y.Z (e.g. v1.0.0)
 * `ghcr.io/cirosec-studis/zimbraweb-smtp-bridge:develop` - development build
 
-
-
 If you're on a raspberry pi, note the section [Docker on Raspberry Pi](#docker-on-raspberry-pi).
-
-Optionally mount a logs directory by adding `-v /path/to/logs:/srv/zimbraweb/logs/`.
 
 You can now connect to the container with your SMTP client at localhost:587.
 To authenticate, use your Zimbra Webclient login credentials (without the @domain.tld part!).
@@ -100,3 +127,18 @@ rpi ~$ sudo apt install libseccomp2 -t buster-backports
 ```
 
 This fix is from https://blog.samcater.com/fix-workaround-rpi4-docker-libseccomp2-docker-20/. Alpine requires libseccomp2>2.4.2 but on debian buster has 2.3.6, this fix installes a newer version from the backports repository.
+
+### SMTP Relay function
+
+Zimbra has certain limitations, like not supporting html Emails. If you want to route these unsupported E-Mails via another SMTP relay, use this function. It is disabled by default.
+
+❗ be careful with this option. It can lead to your Mail being classified as Spam or outright rejected by the receiving Server due to wrong Origin.
+
+If you want to take the easy option use the `docker-compose.yml` provided in this repository.
+
+Set the `smtp_fallback` configuration option to `"enabled"` and `smtp_fallback_relay_host` to a Mailserver that accepts Mail on Port 25.
+
+### Known Limitations
+
+* Currently authentication to the Relay host is not supported.
+* Naming the Container after the Mail-Domain of the Zimbra Server or any other Domain, that may be the recipient of actual Mail is not supported and will lead to errors in delivering mail. (See #34)
