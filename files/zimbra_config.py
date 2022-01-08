@@ -38,14 +38,17 @@ def main():
             logging.info("No config file found, creating.")
             create_config()
     else:
-        logging.info("Using existing config file.")
+        logging.info("Existing config file found.")
+        if os.environ.get('ENVCONFIG') == "true":
+            logging.info("ENV config active, overwriting existing config params.")
+            change_config_env()
     while not validate_config():
         if os.isatty(0):
-            ans = input("Current configuration seems invalid. Recreate (y/n)?")
+            ans = input("Current configuration seems invalid or outdated. Recreate (y/n)?")
         else:
             ans = "y"
         while ans not in ["y", "n"]:
-            ans = input("Current configuration seems invalid. Recreate (y/n)?")
+            ans = input("Current configuration seems invalid or outdated. Recreate (y/n)?")
         if ans == "n":
             return
         else:
@@ -99,12 +102,23 @@ def create_config_env():
     with open(CONF_PATH, "w") as f:
         json.dump(DEFAULT_CONIFG, f, indent=4)
 
+# running when config file exists, but newer
+def change_config_env():
+    EXIST_CONFIG = get_config()
+    for key, value in EXIST_CONFIG:
+        if key in os.environ:
+            EXIST_CONFIG[key] = os.getenv(key)
+            logging.info(f"Wrote key {key} with value {EXIST_CONFIG[key]}")
+    
+    with open(CONF_PATH, "w") as f:
+        json.dump(DEFAULT_CONIFG, f, indent=4)
+
 def get_config() -> Dict[str, str]:
     if not validate_config():
         logging.warning("Invalid configuration! Falling back to default values.")
         return DEFAULT_CONIFG
     with open(CONF_PATH, "r") as f:
-            config = json.load(f)
+        config = json.load(f)
     return config
 
 if __name__ == "__main__":
