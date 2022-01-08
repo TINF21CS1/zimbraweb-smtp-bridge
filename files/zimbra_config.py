@@ -43,17 +43,17 @@ def main():
             logging.info("ENV config active, overwriting existing config params.")
             change_config_env()
     while not validate_config():
-        if os.isatty(0):
-            ans = input("Current configuration seems invalid or outdated. Recreate (y/n)?")
-        else:
-            ans = "y"
-        while ans not in ["y", "n"]:
-            ans = input("Current configuration seems invalid or outdated. Recreate (y/n)?")
-        if ans == "n":
-            return
-        else:
-            logging.info("Invalid or outdated config, overwriting with default.")
-            create_config()
+        if not validate_uptodate(): #missing params
+            logging.info("Adding missing params from default")
+            add_config_missing()
+        else: #other invalidity
+            if os.isatty(0): ans = input("Current configuration seems invalid or outdated. Recreate (y/n)?")
+            else: ans = "y"
+            while ans not in ["y", "n"]: ans = input("Current configuration seems invalid or outdated. Recreate (y/n)?")
+            if ans == "n": return
+            if ans == "y":
+                logging.info("Invalid or outdated config, overwriting with default.")
+                create_config()
     return
 
 def validate_config() -> bool:
@@ -63,6 +63,7 @@ def validate_config() -> bool:
         except JSONDecodeError:
             logging.warning("Corrupt config file. (Invalid JSON)")
             return False
+
     if not "zimbra_host" in config:
         logging.warning("Missing zimbra_host parameter")
         return False
@@ -70,15 +71,30 @@ def validate_config() -> bool:
     if not host:
         logging.warning("Malformed zimbra_host. You need to include the protocol (http(s)://)!")
 
+    email_domain = re.match(r"(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]", config["email_domain"])
+    if not email_domain:
+        logging.warning("Malformed email_domain. Only include the part after the @ sign.")
+        return False
+    
+    if not validate_uptodate():
+        return False
+
+    return True
+
+# check for missing keys
+def validate_uptodate() -> bool:
+    with open(CONF_PATH, "r") as f:
+        try:
+            config = json.load(f)
+        except JSONDecodeError:
+            logging.warning("Corrupt config file. (Invalid JSON)")
+            return False
+
     for default_key, default_value in DEFAULT_CONIFG.items():
         if not default_key in config:
             logging.warning(f"Missing parameter: {default_key}")
             return False
     
-    email_domain = re.match(r"(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]", config["email_domain"])
-    if not email_domain:
-        logging.warning("Malformed email_domain. Only include the part after the @ sign.")
-        return False
     return True
 
 def create_config():
@@ -112,6 +128,13 @@ def change_config_env():
     
     with open(CONF_PATH, "w") as f:
         json.dump(DEFAULT_CONIFG, f, indent=4)
+
+def add_config_missing():
+    EXIST_CONFIG = get_config()
+    for key, default_value in DEFAULT_CONIFG.items():
+        if not key in EXIST_CONFIG:
+            EXIST_CONFIG[key] = DEFAULT_CONIFG[key]
+            logging.info(f"Wrote key {key} with default value {EXIST_CONFIG[key]}")
 
 def get_config() -> Dict[str, str]:
     if not validate_config():
