@@ -3,7 +3,7 @@
 version: '3'
 services:
   zimbraweb:
-    image: 'ghcr.io/cirosec-studis/zimbraweb-smtp-bridge:latest'
+    image: 'ghcr.io/TINF21CS1/zimbraweb-smtp-bridge:latest'
     restart: unless-stopped
     ports:
     - '587:587'
