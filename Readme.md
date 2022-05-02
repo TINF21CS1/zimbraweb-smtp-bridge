@@ -1,6 +1,6 @@
 # Zimbraweb-SMTP-Bridge in Docker
 
-This Container allows users to send E-Mails via SMTP to a Zimbra Web Interface. It utilizes Postfix as receiver and the python package [zimbraweb](https://github.com/cirosec-studis/python-zimbra-web).
+This Container allows users to send E-Mails via SMTP to a Zimbra Web Interface. It utilizes Postfix as receiver and the python package [zimbraweb](https://github.com/TINF21CS1/python-zimbra-web).
 
 <span style="color: red;">This Container is still in development and should not be used in Production environments or for important E-Mails!</span>
 
@@ -39,7 +39,7 @@ In Thunderbird you should go to Acccount Settings, select "Composition & Address
 To start the container use the following command
 
 ```
-docker run --name smtp_bridge -p 587:587 ghcr.io/cirosec-studis/zimbraweb-smtp-bridge:nightly
+docker run --name smtp_bridge -p 587:587 ghcr.io/TINF21CS1/zimbraweb-smtp-bridge:nightly
 ```
 
 If you do not have a domain name associated with the server, you can use whatever hostname you want, e.g. "smtp_bridge.local".
@@ -92,7 +92,7 @@ Put the certificate and key into a folder on your host and name them `cert.pem` 
 Then you can use the following command to start the container with the certificate and key you just created:
 
 ```
-docker run -v /host/path/to/tls/folder/:/tls/ --name smtp_bridge -h <your_domain_name> -p 587:587 ghcr.io/cirosec-studis/zimbraweb-smtp-bridge:nightly
+docker run -v /host/path/to/tls/folder/:/tls/ --name smtp_bridge -h <your_domain_name> -p 587:587 ghcr.io/TINF21CS1/zimbraweb-smtp-bridge:nightly
 ```
 
 That's it, the container will now use the signed TLS certificate.
@@ -101,10 +101,10 @@ That's it, the container will now use the signed TLS certificate.
 
 The following tags are available:
 
-* `ghcr.io/cirosec-studis/zimbraweb-smtp-bridge:nightly` - This builds from `main` every night so that changes in the zimbraweb package are pulled into the container. Use this one to stay up to date.
-* `ghcr.io/cirosec-studis/zimbraweb-smtp-bridge:latest` - Latest tagged build
-* `ghcr.io/cirosec-studis/zimbraweb-smtp-bridge:vX.Y.Z` - Version X.Y.Z (e.g. v1.0.0)
-* `ghcr.io/cirosec-studis/zimbraweb-smtp-bridge:develop` - development build
+* `ghcr.io/TINF21CS1/zimbraweb-smtp-bridge:nightly` - This builds from `main` every night so that changes in the zimbraweb package are pulled into the container. Use this one to stay up to date.
+* `ghcr.io/TINF21CS1/zimbraweb-smtp-bridge:latest` - Latest tagged build
+* `ghcr.io/TINF21CS1/zimbraweb-smtp-bridge:vX.Y.Z` - Version X.Y.Z (e.g. v1.0.0)
+* `ghcr.io/TINF21CS1/zimbraweb-smtp-bridge:develop` - development build
 
 If you're on a raspberry pi, note the section [Docker on Raspberry Pi](#docker-on-raspberry-pi).
 
